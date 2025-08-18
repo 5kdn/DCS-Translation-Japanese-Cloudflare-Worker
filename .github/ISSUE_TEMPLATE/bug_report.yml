@@ -1,0 +1,125 @@
+name: 🐛 バグ報告
+description: Cloudflare Worker / GitHub 連携 API の不具合を報告するテンプレート
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 事前確認
+      description: Issue 作成前に以下を確認してください
+      options:
+        - label: 最新の `master`（またはデプロイ済みバージョン）で再現することを確認しました
+          required: true
+        - label: 既存 Issue / Discussion / Discord で同様の報告がないか確認しました
+          required: true
+
+  - type: input
+    id: summary
+    attributes:
+      label: 概要
+      description: 発生した不具合を 1 行でまとめてください
+      placeholder: "例: POST /create-pr が500を返し PR が作成されない"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: 影響領域
+      description: 不具合が発生した機能を選択してください（複数可）
+      multiple: true
+      options:
+        - label: Cloudflare Worker API 本番
+        - label: Cloudflare Worker Dev / wrangler dev
+        - label: OpenAPI / Swagger UI
+        - label: GitHub 連携処理（Octokit）
+        - label: ZIP 生成機能
+        - label: その他（備考に詳細を記載）
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: リクエスト手順や使用した CLI/スクリプトをステップで記載してください
+      placeholder: |
+        例:
+        1. `pnpm dev` を実行しローカルで `/create-pr` を叩く
+        2. payload に DCSWorld 配下の差分を指定
+        3. レスポンスが 500 になる
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: 使用したリクエスト / パラメーター
+      description: エンドポイント、HTTP メソッド、主要なヘッダーや payload を記載してください（認証情報は伏せる）
+      placeholder: |
+        例:
+        - エンドポイント: POST /create-pr
+        - リクエストID: 2025-11-05T12:34:56Z
+        - payload 抜粋: { "files": [...] }
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される動作
+      description: 正常時にどう振る舞うべきか記載してください
+      placeholder: "例: PR が作成され、レスポンスに URL が含まれる"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+      description: 取得したレスポンス、UI 表示、エラーメッセージなどを具体的に記載してください
+      placeholder: "例: `GitHub API: 422 Validation Failed` が返る"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 実行環境
+      description: 発生環境をできるだけ詳しく記載してください
+      placeholder: |
+        例:
+        - OS: Windows 11 / WSL2 Ubuntu 22.04
+        - Node.js: v20.11.1
+        - pnpm: 9.12.0
+        - wrangler: 4.0.0
+        - Cloudflare Worker bindings: NODE_ENV=development, AllowOrigins=http://localhost:8787
+        - 対象リポジトリ: TARGET_GH_OWNER=5kdn / TARGET_GH_REPO=DCS-Translation-Japanese
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ / スタックトレース
+      description: wrangler のターミナルログや Cloudflare ダッシュボードのエラーを貼り付けてください（機微情報は伏字にする）
+      placeholder: "例: [2025-11-05T12:34:56Z] ERROR Octokit request failed..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響範囲・回避策
+      description: 影響を受ける利用者や一時的な回避策があれば記載してください
+      placeholder: "例: `/download-zip` のみ影響 / 本番には影響せず dev のみ"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 補足情報
+      description: 参考資料、関連 Issue/PR、画面キャプチャなどがあれば記載してください
+      placeholder: "例: 類似 Issue #123、Discord のやりとりリンク"
+    validations:
+      required: false

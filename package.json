@@ -1,0 +1,35 @@
+{
+  "name": "dcs-translation-japanese-cloudflare-worker",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --script src/index.dev.ts",
+    "lint": "biome lint .",
+    "fmt": "biome format . --write",
+    "check": "biome check .",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types",
+    "generate-licenses": "license-checker-rseidelsohn --markdown --production --excludePrivatePackages --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md --files THIRD-PARTY-NOTICES/files"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.5",
+    "@cloudflare/vitest-pool-workers": "^0.9.10",
+    "@types/node": "^24.1.0",
+    "esbuild": "^0.25.10",
+    "license-checker-rseidelsohn": "^4.4.2",
+    "typescript": "^5.9.3",
+    "vitest": "~3.2.4",
+    "wrangler": "^4.42.0"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.1.0",
+    "@octokit/types": "^14.1.0",
+    "fflate": "^0.8.2",
+    "hono": "^4.9.3",
+    "octokit": "^5.0.3",
+    "zod": "^4.1.0"
+  }
+}

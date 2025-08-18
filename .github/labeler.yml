@@ -1,0 +1,80 @@
+# ------------------------------------------------------------
+# .github/labeler.yml
+# Purpose:
+#   - PR の変更ファイルパスに応じて自動ラベル付与
+#   - ラベルは事前にリポジトリ側で作成しておくこと（Settings > Labels）
+# Notes:
+#   - actions/labeler@v6 形式（changed-files / any-glob-to-any-file）
+#   - ここにないラベル（prio/*, status/* など）は人手または他Automationで付与
+# ------------------------------------------------------------
+
+"Worker":
+  - changed-files:
+    - any-glob-to-any-file: "src/index.ts"
+    - any-glob-to-any-file: "src/index.dev.ts"
+    - any-glob-to-any-file: "src/config/**"
+    - any-glob-to-any-file: "src/errors/**"
+    - any-glob-to-any-file: "src/helpers/**"
+    - any-glob-to-any-file: "src/services/**"
+    - any-glob-to-any-file: "src/types/**"
+
+"Routes":
+  - changed-files:
+    - any-glob-to-any-file: "src/routes/**"
+
+"Tests":
+  - changed-files:
+    - any-glob-to-any-file: "tests/**"
+    - any-glob-to-any-file: "**/*.test.*"
+    - any-glob-to-any-file: "**/*.spec.*"
+
+"Wrangler Config":
+  - changed-files:
+    - any-glob-to-any-file: "worker-configuration.d.ts"
+    - any-glob-to-any-file: "wrangler.toml"
+    - any-glob-to-any-file: ".wrangler/**"
+    - any-glob-to-any-file: ".dev.vars"
+
+"Dependencies":
+  - changed-files:
+    - any-glob-to-any-file: ".github/dependabot.yml"
+    - any-glob-to-any-file: "package.json"
+    - any-glob-to-any-file: "pnpm-lock.yaml"
+
+"Build Config":
+  - changed-files:
+    - any-glob-to-any-file: "tsconfig*.json"
+    - any-glob-to-any-file: "vitest.config.*"
+    - any-glob-to-any-file: "pnpm-workspace.yaml"
+
+"Release":
+  - changed-files:
+    - any-glob-to-any-file: ".release-please-config.json"
+    - any-glob-to-any-file: ".release-please-manifest.json"
+    - any-glob-to-any-file: "CHANGELOG.md"
+
+"CI / GitHub Actions":
+  - changed-files:
+    - any-glob-to-any-file: ".github/workflows/**"
+    - any-glob-to-any-file: ".github/labeler.yml"
+
+"Docs":
+  - changed-files:
+    - any-glob-to-any-file: "*.md"
+    - any-glob-to-any-file: "THIRD-PARTY-NOTICES/**"
+    - any-glob-to-any-file: ".github/ISSUE_TEMPLATE/**"
+    - any-glob-to-any-file: ".github/PULL_REQUEST_TEMPLATE.md"
+    - any-glob-to-any-file: ".gitmessage.txt"
+    - any-glob-to-any-file: "LICENSE*"
+
+"Code Style / Analyzer":
+  - changed-files:
+    - any-glob-to-any-file: ".editorconfig"
+    - any-glob-to-any-file: "biome.json"
+    - any-glob-to-any-file: "eslint.config.*"
+
+"Infrastructure":
+  - changed-files:
+    - any-glob-to-any-file: ".githooks/**"
+    - any-glob-to-any-file: ".vscode/**"
+    - any-glob-to-any-file: "workspace.code-workspace"

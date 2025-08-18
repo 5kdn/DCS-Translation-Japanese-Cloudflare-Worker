@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Wrangler Dev (start)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm wrangler dev --inspect",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.dev.vars"
+    },
+    {
+      "name": "Wrangler Dev (attach)",
+      "type": "pwa-node",
+      "request": "attach",
+      "address": "127.0.0.1",
+      "port": 9229,
+      "cwd": "${workspaceFolder}",
+      "autoAttachChildProcesses": false,
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ]
+    },
+    {
+      "name": "Vitest Debug (current file)",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.dev.vars",
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Wrangler Dev + Attach",
+      "configurations": [
+        "Wrangler Dev (start)",
+        "Wrangler Dev (attach)"
+      ]
+    }
+  ]
+}

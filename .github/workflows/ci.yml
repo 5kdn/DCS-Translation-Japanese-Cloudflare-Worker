@@ -1,0 +1,60 @@
+# ------------------------------------------------------------
+# Workflow Name : CI
+# Trigger       : pull_request to master
+# Purpose       :
+#   - 変更に対して Lint / UnitTest を実行
+# ------------------------------------------------------------
+name: CI
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/**/*'
+      - 'tests/**/*'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.*'
+
+concurrency:
+  group: ci-${{ github.event.pull_request.head.repo.full_name }}-${{ github.event.pull_request.head.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  LintAndFormat:
+    name: Lint and format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 'latest'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 'latest'
+          cache: 'pnpm'
+
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm biome check .
+
+  UnitTest:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 'latest'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 'latest'
+          cache: 'pnpm'
+
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm vitest --run

@@ -1,0 +1,69 @@
+# ------------------------------------------------------------
+# Purpose:
+#   - 依存の自動更新（セキュリティ & 定期）
+# ------------------------------------------------------------
+version: 2
+
+updates:
+
+# ─────────────────────────────────────────────────────────
+# 1) GitHub Actions のアクション更新を監視
+# ─────────────────────────────────────────────────────────
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+    time: "03:20"
+    timezone: "Asia/Tokyo"
+  target-branch: "master"
+  labels:
+    - "dependencies"
+    - "ci"
+
+# ─────────────────────────────────────────────────────────
+# 2) Node.js (pnpm-lock.yaml) の依存を監視
+#    ※ Dependabotはpnpm-lock.yamlをnpmとして処理
+# ─────────────────────────────────────────────────────────
+- package-ecosystem: "npm"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+    time: "03:40"
+    timezone: "Asia/Tokyo"
+  target-branch: "master"
+  labels:
+    - "dependencies"
+    - "npm"
+  versioning-strategy: increase
+  open-pull-requests-limit: 10
+  rebase-strategy: "auto"
+  commit-message:
+    prefix: "deps"
+    include: "scope"
+  groups:
+    wrangler-and-workers:
+      patterns:
+        - "wrangler"
+        - "@cloudflare/*"
+    hono-and-openapi:
+      patterns:
+        - "hono"
+        - "@hono/*"
+        - "@hono/zod-openapi"
+        - "zod"
+    github-clients:
+      patterns:
+        - "octokit"
+        - "@octokit/*"
+        - "@octokit/types"
+    tooling-and-tests:
+      patterns:
+        - "vitest"
+        - "esbuild"
+        - "license-checker*"
+        - "@cloudflare/vitest-pool-workers"
+    types-and-biome:
+      patterns:
+        - "typescript"
+        - "@types/*"
+        - "@biomejs/*"

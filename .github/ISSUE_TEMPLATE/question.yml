@@ -1,0 +1,70 @@
+name: ❓ 質問
+description: API の使い方や挙動に関する質問を記録するテンプレート（チャット的な質問は Discord 推奨）
+title: "[Question]: "
+labels: [question]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 質問の概要
+      description: 何についての質問か 1 行で記載してください
+      placeholder: "例: `/download-zip` のレスポンスを直接ファイルに保存したい"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: トピック
+      description: 対象領域を選択してください（複数可）
+      multiple: true
+      options:
+        - label: Cloudflare Worker / wrangler
+        - label: GitHub API 連携
+        - label: OpenAPI / Swagger
+        - label: CI / Release / 自動化
+        - label: その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 背景・前提
+      description: どのような状況で疑問が生じたか、使用中のバージョンなどを書いてください
+      placeholder: |
+        例:
+        - README のデプロイ手順を実施中に wrangler エラーが出た
+        - Cloudflare KV のバインディングを追加したい
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 試したこと / 調査済み
+      description: 既に確認したドキュメントや実施したコマンドがあれば記載してください
+      placeholder: |
+        例:
+        - CONTRIBUTING.md を参照
+        - `pnpm dev` でリクエストログを確認
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 知りたいこと / 期待する答え
+      description: どのような情報が得られれば解決するかを記載してください
+      placeholder: "例: Cloudflare Secrets に PAT を登録する CLI コマンド"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 補足
+      description: 関連 Issue/PR、ログ、スクリーンショットなどがあれば記載してください
+      placeholder: "例: 類似 Issue #123、参考リンク"
+    validations:
+      required: false

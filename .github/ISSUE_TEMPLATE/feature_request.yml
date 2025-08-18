@@ -1,0 +1,76 @@
+name: ✨ 新機能リクエスト
+description: 新しい API / 自動化フロー / 管理ツールの追加を提案するテンプレート
+title: "[Feature]: "
+labels: [feature_request]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 概要
+      description: 追加したい機能を 1 行で記載してください
+      placeholder: "例: `/compare` エンドポイントで差分プレビューを返したい"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 背景・課題
+      description: この機能で解決したい課題や利用シナリオを記載してください
+      placeholder: |
+        例:
+        - 翻訳者が PR を作成する前に差分を閲覧したい
+        - Discord Bot から直接 API を叩きたい
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: 主な利用者
+      description: 想定ユーザーを選択してください（複数可）
+      multiple: true
+      options:
+        - label: 翻訳メンテナ
+        - label: 自動化 Bot / CI
+        - label: 外部利用者（公開 API）
+        - label: コア開発者
+        - label: その他（補足に記載）
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 提案する解決策
+      description: API 仕様、Worker 構成、依存サービスなどのアイデアがあれば記載してください
+      placeholder: "例: Hono のルートを追加し Octokit でドラフト PR を作成する"
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 完了条件
+      description: 受け入れ基準や必要なバリデーション、レスポンス例などを記載してください
+      placeholder: "例: 成功時に PR URL を返す / 失敗時は GitHub エラーコードを透過"
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 代替案
+      description: 考慮済みの代替手段や既存フローとの比較があれば記載してください
+      placeholder: "例: GitHub Actions で実行する案も検討したがワークロードが重い"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 補足情報
+      description: 図解、参考資料、関連 Issue/PR などがあれば記載してください
+      placeholder: "例: 類似ツール / Swagger 例 / モックレスポンス"
+    validations:
+      required: false

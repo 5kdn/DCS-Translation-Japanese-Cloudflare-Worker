@@ -1,0 +1,77 @@
+name: 🔧 改善提案
+description: 既存 API / 運用フローの最適化やパフォーマンス改善を提案するテンプレート
+title: "[Enhancement]: "
+labels: [enhancement]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 概要
+      description: 改善したい既存機能を 1 行でまとめてください
+      placeholder: "例: `/tree` の応答速度を短縮したい"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: 対象領域
+      description: 改善したいコンポーネントを選択してください（複数可）
+      multiple: true
+      options:
+        - label: Cloudflare Worker ルーティング / ミドルウェア
+        - label: GitHub API 連携（Octokit）
+        - label: ZIP 生成 / 圧縮処理
+        - label: OpenAPI / Swagger UI
+        - label: CI / CD / Release Please
+        - label: その他（補足に記載）
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: 現状の課題
+      description: 発生している課題・指標・ユーザーからの声などを記載してください
+      placeholder: |
+        例:
+        - `/tree` が 5MB を超えるレスポンスを返し wrangler dev がタイムアウトする
+        - Zip 生成時のメモリ消費が大きい
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 改善案
+      description: 期待する改善後の状態や技術的アプローチを書いてください
+      placeholder: "例: GitHub API への並列リクエストをやめてキャッシュを導入する"
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 完了条件 / メトリクス
+      description: 改善が完了したと判断できる条件や SLA を記載してください
+      placeholder: "例: `/tree` が 1s 未満で応答 / wrangler dev で GC が発生しない"
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響範囲・リスク
+      description: 影響を受けるユーザー、既存機能との互換性、移行手順など
+      placeholder: "例: 本番 Worker 再デプロイが必要 / 既存 API 契約を変更しない"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 補足情報
+      description: 参考資料や関連 Issue/PR、Grafana スクリーンショットなど
+      placeholder: "例: 類似 Issue #789、パフォーマンス計測ログ"
+    validations:
+      required: false

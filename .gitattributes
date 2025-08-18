@@ -1,0 +1,12 @@
+# 自動的に行末を正規化（LF）
+* text eol=lf working-tree-encoding=UTF-8
+
+# Windows 用バッチ／スクリプトは CRLF に
+*.{cmd,bat} text eol=crlf
+
+# シェルスクリプトは LF に
+*.sh text eol=lf
+
+# ロックファイルのマージ衝突を避ける
+package-lock.json merge=ours
+pnpm-lock.yaml merge=ours

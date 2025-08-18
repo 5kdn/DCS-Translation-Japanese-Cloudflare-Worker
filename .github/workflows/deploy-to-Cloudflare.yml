@@ -1,0 +1,48 @@
+# ------------------------------------------------------------
+# Workflow Name : Deploy to Cloudflare
+# Trigger       : release type publish
+# Purpose       :
+#   - Cloudflare workers にデプロイする
+# ------------------------------------------------------------
+name: Deploy to Cloudflare
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  Deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    concurrency:
+      group: cloudflare-deploy-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 'latest'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 'latest'
+          cache: 'pnpm'
+
+      - run: pnpm i --frozen-lockfile
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          packageManager: pnpm
+          secrets: |
+            TARGET_GH_SECRET
+        env:
+          TARGET_GH_SECRET: ${{ secrets.TARGET_GH_SECRET }}
