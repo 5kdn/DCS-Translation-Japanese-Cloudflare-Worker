@@ -11,7 +11,47 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
     "version": Any<String>,
   },
   "openapi": "3.1.0",
-  "paths": {},
+  "paths": {
+    "/health": {
+      "get": {
+        "description": "アプリケーションが稼働中であることを確認するためのエンドポイント。
+システム監視や Kubernetes の Liveness Probe などに利用できる。
+成功時には HTTP 200 とともに現在時刻を ISO 8601 形式で返す。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "ok",
+                      ],
+                      "type": "string",
+                    },
+                    "timestamp": {
+                      "format": "date-time",
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "status",
+                    "timestamp",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Liveness probe",
+          },
+        },
+        "summary": "アプリケーションのヘルスチェック",
+        "tags": [
+          "health",
+        ],
+      },
+    },
+  },
   "servers": [
     {
       "description": "DCS Translation Japanese の翻訳ファイルを取得・配布・登録する API サーバー。",
