@@ -51,6 +51,178 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
         ],
       },
     },
+    "/tree": {
+      "get": {
+        "description": "指定された GitHub リポジトリのデフォルトブランチから、DCSWorld, UserMissions 配下のファイル一覧（TreeItem配列）を取得して返す。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "mode": {
+                            "type": "string",
+                          },
+                          "path": {
+                            "type": "string",
+                          },
+                          "sha": {
+                            "type": "string",
+                          },
+                          "size": {
+                            "minimum": 0,
+                            "type": "integer",
+                          },
+                          "type": {
+                            "enum": [
+                              "blob",
+                            ],
+                            "type": "string",
+                          },
+                          "url": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "path",
+                          "mode",
+                          "type",
+                          "sha",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "enum": [
+                        true,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "ok",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "enum": [
+                        false,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "bad request",
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "enum": [
+                        false,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "forbidden",
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "enum": [
+                        false,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unprocessable entity",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "enum": [
+                        false,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "error",
+          },
+        },
+        "summary": "GitHub リポジトリのツリー構造を取得",
+        "tags": [
+          "tree",
+        ],
+      },
+    },
   },
   "servers": [
     {

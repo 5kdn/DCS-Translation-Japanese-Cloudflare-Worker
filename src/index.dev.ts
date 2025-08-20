@@ -2,6 +2,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import docsRoute from '@/routes/docs';
 import healthRoute from '@/routes/health';
+import treeRoute from '@/routes/tree';
 import type { AppEnv } from '@/types/env';
 
 const packageJson = await import('../package.json', { assert: { type: 'json' } });
@@ -45,5 +46,5 @@ app.use(
 // mount routes
 app.route('/', docsRoute);
 app.route('/', healthRoute);
-
+app.route('/', treeRoute);
 export default app;
