@@ -12,6 +12,246 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
   },
   "openapi": "3.1.0",
   "paths": {
+    "/download-files": {
+      "post": {
+        "description": "指定したリポジトリから複数のファイルを取得し、ZIP ストリームで返却するエンドポイントです。
+用途: UI からの一括ダウンロードや外部連携。
+
+リクエスト:
+- JSON Body { paths: string[] } を必須とし、空文字・重複・不正パスを検証します。
+
+制限:
+- 件数上限: 500。
+- 単一ファイル上限: 104857600 bytes。合計上限: 1073741824 bytes。
+
+レート制限:
+- Token Bucket を使用します。X-RateLimit-* ヘッダを返却し、超過時は 429 を返します。
+
+キャッシュ:
+- If-None-Match を評価し、ETag が一致する場合は 304 を返します。
+
+エラー応答:
+- application/problem+json を返します。type は validation / unprocessable / rate-limit / internal を使用します。
+",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "paths": {
+                    "items": {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "maxItems": 500,
+                    "minItems": 1,
+                    "type": "array",
+                  },
+                },
+                "required": [
+                  "paths",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "description": "ZIPストリームを返却する",
+                  "format": "binary",
+                  "type": "string",
+                },
+              },
+            },
+            "description": "ZIPファイルを返却する",
+          },
+          "304": {
+            "description": "変更なし",
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                    },
+                    "errors": {
+                      "additionalProperties": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "type": "object",
+                    },
+                    "instance": {
+                      "type": "string",
+                    },
+                    "status": {
+                      "type": "integer",
+                    },
+                    "title": {
+                      "type": "string",
+                    },
+                    "type": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "入力検証エラー",
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                    },
+                    "errors": {
+                      "additionalProperties": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "type": "object",
+                    },
+                    "instance": {
+                      "type": "string",
+                    },
+                    "status": {
+                      "type": "integer",
+                    },
+                    "title": {
+                      "type": "string",
+                    },
+                    "type": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "取得対象エラー",
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                    },
+                    "errors": {
+                      "additionalProperties": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "type": "object",
+                    },
+                    "instance": {
+                      "type": "string",
+                    },
+                    "status": {
+                      "type": "integer",
+                    },
+                    "title": {
+                      "type": "string",
+                    },
+                    "type": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "レート制限超過",
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                    },
+                    "errors": {
+                      "additionalProperties": {
+                        "items": {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
+                      "type": "object",
+                    },
+                    "instance": {
+                      "type": "string",
+                    },
+                    "status": {
+                      "type": "integer",
+                    },
+                    "title": {
+                      "type": "string",
+                    },
+                    "type": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "サーバエラー",
+          },
+        },
+        "summary": "指定パスの複数ファイルをZIPで返却する",
+        "tags": [
+          "download-files",
+        ],
+      },
+    },
     "/health": {
       "get": {
         "description": "アプリケーションが稼働中であることを確認するためのエンドポイント。

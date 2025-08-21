@@ -3,7 +3,7 @@
 
 name = "dcs-translation-japanese-cloudflare-worker"
 main = "src/index.ts"
-compatibility_date = "2022-10-31"
+compatibility_date = "2025-08-01"
 
 [observability]
 enabled = true
