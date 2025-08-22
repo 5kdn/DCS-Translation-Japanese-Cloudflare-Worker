@@ -6,3 +6,55 @@ export interface TreeItem {
   size?: number | undefined;
   url?: string | undefined;
 }
+
+/** API リクエストボディ */
+export interface PullRequestPayload {
+  /** PR タイトル（必須） */
+  prTitle: string;
+  /** PR 本文（任意） */
+  prBody?: string;
+  /** 新規ブランチ名（省略時は feature/<timestamp>） */
+  branchName: string;
+  /** コミットメッセージ（省略時 title と同一） */
+  commitMessage?: string;
+  /** コミット対象ファイル群（必須） */
+  files: RepoFile[];
+}
+
+/** コミット対象ファイル */
+export type RepoFile = RepoFileUpsert | RepoFileDelete;
+
+/** リポジトリに追加・更新するファイル */
+export interface RepoFileUpsert {
+  /** ファイルパス（例: "src/index.ts"） */
+  path: string;
+  /** ファイル内容（UTF-8 テキスト） */
+  content: string;
+  /** 操作種別（省略時は upsert） */
+  operation?: Exclude<RepoFileOperation, 'delete'>;
+}
+
+/** リポジトリから削除するファイル */
+export interface RepoFileDelete {
+  /** ファイルパス（例: "src/index.ts"） */
+  path: string;
+  /** 操作種別 */
+  operation: Extract<RepoFileOperation, 'delete'>;
+}
+
+/** コミット対象ファイルの操作種別 */
+export type RepoFileOperation = 'upsert' | 'delete';
+
+/** API レスポンス */
+export interface PullRequestResult {
+  /** PR 番号 */
+  prNumber: number;
+  /** PR の URL */
+  prUrl: string;
+  /** 作成されたブランチ名 */
+  branchName: string;
+  /** 最新コミットの SHA */
+  commitSha: string;
+  /** 既存 PR 再利用時の注記（存在する場合のみ） */
+  note?: string;
+}

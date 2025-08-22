@@ -1,5 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
+import createPrRoute from '@/routes/create-pr';
 import docsRoute from '@/routes/docs';
 import downloadFilesRoute from '@/routes/download-files';
 import healthRoute from '@/routes/health';
@@ -45,6 +46,7 @@ app.use(
 );
 
 // mount routes
+app.route('/', createPrRoute);
 app.route('/', docsRoute);
 app.route('/', downloadFilesRoute);
 app.route('/', healthRoute);

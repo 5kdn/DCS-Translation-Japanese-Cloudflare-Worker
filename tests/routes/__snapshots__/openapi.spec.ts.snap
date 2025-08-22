@@ -12,6 +12,258 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
   },
   "openapi": "3.1.0",
   "paths": {
+    "/create-pr": {
+      "post": {
+        "description": "指定のブランチにファイル変更をコミットし、Pull Request を作成します。
+
+リクエスト:
+- prTitle: PR のタイトル（必須）
+- prBody: PR の本文（任意）
+- branchName: 作成または更新するブランチ名（必須）
+- commitMessage: コミットメッセージ（任意、未指定時はデフォルト）
+- files: 変更対象の配列。{ path, content, operation }。operation は upsert|delete。
+
+検証/安全性:
+- path は ensureUserPathSafe によってパス走査などを防止します。
+
+応答:
+- 成功時は prNumber, prUrl, branchName, commitSha, note を含む配列を返します。
+
+エラー:
+- 400: リクエスト不正
+- 403: 権限不足
+- 422: 処理不能（内容不整合など）
+- 500: サーバエラー",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "branchName": {
+                    "type": "string",
+                  },
+                  "commitMessage": {
+                    "type": "string",
+                  },
+                  "files": {
+                    "items": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "content": {
+                              "type": "string",
+                            },
+                            "operation": {
+                              "enum": [
+                                "upsert",
+                              ],
+                              "type": "string",
+                            },
+                            "path": {
+                              "type": "string",
+                            },
+                          },
+                          "required": [
+                            "path",
+                            "content",
+                          ],
+                          "type": "object",
+                        },
+                        {
+                          "properties": {
+                            "operation": {
+                              "enum": [
+                                "delete",
+                              ],
+                              "type": "string",
+                            },
+                            "path": {
+                              "type": "string",
+                            },
+                          },
+                          "required": [
+                            "path",
+                            "operation",
+                          ],
+                          "type": "object",
+                        },
+                      ],
+                    },
+                    "type": "array",
+                  },
+                  "prBody": {
+                    "type": "string",
+                  },
+                  "prTitle": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "prTitle",
+                  "branchName",
+                  "files",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "branchName": {
+                            "type": "string",
+                          },
+                          "commitSha": {
+                            "type": "string",
+                          },
+                          "note": {
+                            "type": "string",
+                          },
+                          "prNumber": {
+                            "type": "integer",
+                          },
+                          "prUrl": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "prNumber",
+                          "prUrl",
+                          "branchName",
+                          "commitSha",
+                        ],
+                        "type": "object",
+                      },
+                      "nullable": true,
+                      "type": "array",
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "ok",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "bad request",
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "forbidden",
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unprocessable entity",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "error",
+          },
+        },
+        "summary": "GitHub に Pull Request を作成する",
+        "tags": [
+          "create-pr",
+        ],
+      },
+    },
     "/download-files": {
       "post": {
         "description": "指定したリポジトリから複数のファイルを取得し、ZIP ストリームで返却するエンドポイントです。
