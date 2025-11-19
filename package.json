@@ -28,7 +28,7 @@
     "@hono/zod-openapi": "^1.1.4",
     "@octokit/types": "^14.1.0",
     "fflate": "^0.8.2",
-    "hono": "^4.10.4",
+    "hono": "^4.10.6",
     "octokit": "^5.0.5",
     "zod": "^4.1.12"
   }
