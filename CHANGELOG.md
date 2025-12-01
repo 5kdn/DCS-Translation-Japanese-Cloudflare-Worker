@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.1.0...v1.2.0) (2025-12-01)
+
+
+### Features
+
+* add download file paths entry ([#15](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/15)) ([3fc63c2](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/3fc63c2f3ca1626ff4a57ed4ce9b10aa1ca9fb6b))
+
 ## [1.1.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.0.0...v1.1.0) (2025-12-01)
 
 
