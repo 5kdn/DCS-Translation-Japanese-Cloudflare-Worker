@@ -2,6 +2,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import createPrRoute from '@/routes/create-pr';
 import docsRoute from '@/routes/docs';
+import downloadFilePathsRoute from '@/routes/download-file-paths';
 import downloadFilesRoute from '@/routes/download-files';
 import healthRoute from '@/routes/health';
 import treeRoute from '@/routes/tree';
@@ -49,6 +50,7 @@ app.use(
 app.route('/', createPrRoute);
 app.route('/', docsRoute);
 app.route('/', downloadFilesRoute);
+app.route('/', downloadFilePathsRoute);
 app.route('/', healthRoute);
 app.route('/', treeRoute);
 export default app;
