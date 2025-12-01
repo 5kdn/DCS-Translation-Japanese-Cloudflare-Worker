@@ -12,6 +12,7 @@ import type { AppEnv } from '@/types/env';
 
 const DEFAULT_RATE_LIMIT = 30;
 const RATE_LIMIT_WINDOW_MS = 60_000;
+const GITHUB_FETCH_PAGE_SIZE = 100;
 const rateLimiterCache = new Map<number, TokenBucketRateLimiter>();
 const PROBLEM_TYPE_VALIDATION = 'https://dcs-translation-japanese.workers.dev/problem/validation';
 const PROBLEM_TYPE_UNPROCESSABLE = 'https://dcs-translation-japanese.workers.dev/problem/unprocessable';
@@ -314,36 +315,38 @@ const fetchFiles = async (
   const files: Array<{ path: string; content: Uint8Array; size: number; sha: string; sha256: string }> = [];
   let total = 0;
 
-  for (const record of records) {
-    try {
-      const file = await fetchRepositoryFile(ctx, record.path);
-      if (file.size > DEFAULT_DOWNLOAD_LIMITS.maxSingleBytes) {
-        pushError(
-          errors,
-          `paths[${record.index}]`,
-          `ファイルサイズが上限(${DEFAULT_DOWNLOAD_LIMITS.maxSingleBytes}バイト)を超過しています。`,
-        );
-        continue;
+  for (const page of paginate(records, GITHUB_FETCH_PAGE_SIZE)) {
+    for (const record of page) {
+      try {
+        const file = await fetchRepositoryFile(ctx, record.path);
+        if (file.size > DEFAULT_DOWNLOAD_LIMITS.maxSingleBytes) {
+          pushError(
+            errors,
+            `paths[${record.index}]`,
+            `ファイルサイズが上限(${DEFAULT_DOWNLOAD_LIMITS.maxSingleBytes}バイト)を超過しています。`,
+          );
+          continue;
+        }
+        const nextTotal = total + file.size;
+        if (nextTotal > DEFAULT_DOWNLOAD_LIMITS.maxTotalBytes) {
+          pushError(errors, `paths[${record.index}]`, '合計サイズが上限を超過しました。');
+          continue;
+        }
+        total = nextTotal;
+        const sha256 = await digestSha256Hex(file.content);
+        files.push({ path: file.path, content: file.content, size: file.size, sha: file.sha, sha256 });
+      } catch (err) {
+        if (err instanceof RepositoryPathNotFoundError) {
+          pushError(errors, `paths[${record.index}]`, '指定したパスのファイルが見つかりません。');
+          continue;
+        }
+        if (err instanceof UserFacingError) {
+          pushError(errors, `paths[${record.index}]`, err.userMessage);
+          continue;
+        }
+        console.error('failed to fetch repository file', err);
+        pushError(errors, `paths[${record.index}]`, 'ファイル取得中に内部エラーが発生しました。');
       }
-      const nextTotal = total + file.size;
-      if (nextTotal > DEFAULT_DOWNLOAD_LIMITS.maxTotalBytes) {
-        pushError(errors, `paths[${record.index}]`, '合計サイズが上限を超過しました。');
-        continue;
-      }
-      total = nextTotal;
-      const sha256 = await digestSha256Hex(file.content);
-      files.push({ path: file.path, content: file.content, size: file.size, sha: file.sha, sha256 });
-    } catch (err) {
-      if (err instanceof RepositoryPathNotFoundError) {
-        pushError(errors, `paths[${record.index}]`, '指定したパスのファイルが見つかりません。');
-        continue;
-      }
-      if (err instanceof UserFacingError) {
-        pushError(errors, `paths[${record.index}]`, err.userMessage);
-        continue;
-      }
-      console.error('failed to fetch repository file', err);
-      pushError(errors, `paths[${record.index}]`, 'ファイル取得中に内部エラーが発生しました。');
     }
   }
 
@@ -352,6 +355,17 @@ const fetchFiles = async (
   }
 
   return { ok: true, files, totalBytes: total };
+};
+
+/**
+ * 配列を指定件数ごとにページ分割する。
+ */
+const paginate = <T>(input: readonly T[], pageSize: number): T[][] => {
+  const pages: T[][] = [];
+  for (let i = 0; i < input.length; i += pageSize) {
+    pages.push(input.slice(i, i + pageSize));
+  }
+  return pages;
 };
 
 const buildManifest = async (

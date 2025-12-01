@@ -26,7 +26,7 @@ AllowOrigins = "https://5kdn.github.io"
 TARGET_GH_OWNER = "5kdn"
 TARGET_GH_REPO = "DCS-Translation-Japanese"
 TARGET_GH_DEFAULT_BRANCH = "master"
-DOWNLOAD_FILES_RATE_LIMIT = "30"
+DOWNLOAD_FILES_RATE_LIMIT = "500"
 
 # Note: Use secrets to store sensitive data.
 # https://developers.cloudflare.com/workers/configuration/secrets/
