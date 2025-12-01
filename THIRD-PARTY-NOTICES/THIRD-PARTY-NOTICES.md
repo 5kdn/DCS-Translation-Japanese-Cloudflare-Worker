@@ -1,6 +1,6 @@
 - [@hono/swagger-ui@0.5.2](https://github.com/honojs/middleware) - MIT
 - [@hono/zod-openapi@1.1.4](https://github.com/honojs/middleware) - MIT
-- [@octokit/types@14.1.0](https://github.com/octokit/types.ts) - MIT
+- [@octokit/types@16.0.0](https://github.com/octokit/types.ts) - MIT
 - [fflate@0.8.2](https://github.com/101arrowz/fflate) - MIT
 - [hono@4.10.4](https://github.com/honojs/hono) - MIT
 - [octokit@5.0.5](https://github.com/octokit/octokit.js) - MIT
