@@ -1834,6 +1834,12 @@ snapshots:
     optionalDependencies:
       workerd: 1.20251113.0
 
+  '@cloudflare/unenv-preset@2.7.11(unenv@2.0.0-rc.24)(workerd@1.20251125.0)':
+    dependencies:
+      unenv: 2.0.0-rc.24
+    optionalDependencies:
+      workerd: 1.20251125.0
+
   '@cloudflare/vitest-pool-workers@0.10.8(@vitest/runner@4.0.10)(@vitest/snapshot@4.0.10)(vitest@3.2.4(@types/node@24.10.1)(yaml@2.8.1))':
     dependencies:
       '@vitest/runner': 4.0.10
