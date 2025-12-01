@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.0.0...v1.1.0) (2025-12-01)
+
+
+### Features
+
+* paginate GitHub downloads in 100-file batches ([#13](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/13)) ([728a733](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/728a7333bd5de8296ef7dae88e980b7600aff596))
+
 ## [1.0.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v0.0.1...v1.0.0) (2025-11-18)
 
 
