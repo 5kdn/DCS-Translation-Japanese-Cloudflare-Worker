@@ -12,6 +12,201 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
   },
   "openapi": "3.1.0",
   "paths": {
+    "/create-issue": {
+      "post": {
+        "description": "指定のリポジトリに Issue を作成します。
+
+リクエスト:
+- title: Issue のタイトル（必須）
+- body: Issue の本文（任意）
+- labels: 適用するラベル配列（任意）
+- assignees: アサインするユーザー配列（任意）
+
+応答:
+- 成功時は issueNumber と issueUrl を含む配列を返します。
+
+エラー:
+- 400: リクエスト不正
+- 403: 権限不足
+- 422: 処理不能（内容不整合など）
+- 500: サーバーエラー",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "assignees": {
+                    "items": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "body": {
+                    "type": "string",
+                  },
+                  "labels": {
+                    "items": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "title": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "title",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "issueNumber": {
+                            "type": "integer",
+                          },
+                          "issueUrl": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "issueNumber",
+                          "issueUrl",
+                        ],
+                        "type": "object",
+                      },
+                      "nullable": true,
+                      "type": "array",
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "ok",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "bad request",
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "forbidden",
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unprocessable entity",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "error",
+          },
+        },
+        "summary": "GitHub に Issue を作成する",
+        "tags": [
+          "create-issue",
+        ],
+      },
+    },
     "/create-pr": {
       "post": {
         "description": "指定のブランチにファイル変更をコミットし、Pull Request を作成します。
