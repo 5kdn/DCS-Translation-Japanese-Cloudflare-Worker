@@ -58,3 +58,23 @@ export interface PullRequestResult {
   /** 既存 PR 再利用時の注記（存在する場合のみ） */
   note?: string;
 }
+
+/** Issue 作成に必要な入力を表す。 */
+export interface IssuePayload {
+  /** Issue のタイトル（必須） */
+  title: string;
+  /** Issue の本文（任意） */
+  body?: string;
+  /** 適用するラベル（任意） */
+  labels?: string[];
+  /** アサインするユーザー（任意） */
+  assignees?: string[];
+}
+
+/** Issue 作成結果を表す。 */
+export interface IssueResult {
+  /** Issue 番号 */
+  issueNumber: number;
+  /** Issue の URL */
+  issueUrl: string;
+}

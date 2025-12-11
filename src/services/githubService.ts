@@ -4,7 +4,16 @@ import { RepositoryPathNotFoundError } from '@/errors/repositoryPathNotFoundErro
 import { UserFacingError } from '@/errors/userFacingError';
 import { decodeBase64 } from '@/helpers/base64Helper';
 import { ensureUserPathSafe } from '@/helpers/pathSafetyHelper';
-import type { PullRequestPayload, PullRequestResult, RepoFile, RepoFileDelete, RepoFileUpsert, TreeItem } from '@/types/types';
+import type {
+  IssuePayload,
+  IssueResult,
+  PullRequestPayload,
+  PullRequestResult,
+  RepoFile,
+  RepoFileDelete,
+  RepoFileUpsert,
+  TreeItem,
+} from '@/types/types';
 
 const VALIDATION_ERROR_CODE = 'VALIDATION_ERROR' as const;
 
@@ -17,7 +26,13 @@ class ValidationError extends Error {
   }
 }
 
-type PullRequestFailure = { error: string; detail?: string; code?: typeof VALIDATION_ERROR_CODE };
+/**
+ * @summary GitHub 操作失敗時に返すエラー情報を表す。
+ * @property error ユーザー向けに表示する簡易エラーメッセージ。
+ * @property detail 追加の詳細メッセージ。
+ * @property code 検証エラー時に VALIDATION_ERROR_CODE を付与する。
+ */
+type GitHubOperationFailure = { error: string; detail?: string; code?: typeof VALIDATION_ERROR_CODE };
 
 /**
  * GitHub リポジトリからツリー構造（ファイル一覧）を取得し、不要な項目を除外して返す。
@@ -97,7 +112,7 @@ export const fetchRepositoryFile = async (
 export const createPullRequest = async (
   payload: PullRequestPayload,
   ctx: GitHubContext,
-): Promise<PullRequestResult | PullRequestFailure> => {
+): Promise<PullRequestResult | GitHubOperationFailure> => {
   try {
     _assertPullRequestPayload(payload);
 
@@ -126,6 +141,45 @@ export const createPullRequest = async (
     if (err instanceof ValidationError) return { error: 'validation error', detail: err.message, code: VALIDATION_ERROR_CODE };
     if (err instanceof Error) return { error: 'failed to create pull request', detail: err.message };
     return { error: 'failed to create pull request', detail: String(err) };
+  }
+};
+
+/**
+ * @summary GitHub 上で Issue を作成する。
+ * @param payload Issue のタイトルや本文、付与するラベル・アサインを受け取る。
+ * @param ctx Octokit や owner/repo などの GitHub コンテキストを受け取る。
+ * @returns 作成された Issue の番号と URL を返す。
+ * @throws {UserFacingError} Issue 作成が無効化されている場合や権限が不足している場合に投げる。
+ */
+export const createIssue = async (payload: IssuePayload, ctx: GitHubContext): Promise<IssueResult | GitHubOperationFailure> => {
+  try {
+    _assertIssuePayload(payload);
+    const { octokit, owner, repo } = ctx;
+    const title = payload.title.trim();
+    const labels = _normalizeStringArray(payload.labels);
+    const assignees = _normalizeStringArray(payload.assignees);
+    const issue = await octokit.rest.issues.create({
+      owner,
+      repo,
+      title,
+      body: payload.body,
+      labels,
+      assignees,
+    });
+    return {
+      issueNumber: issue.data.number,
+      issueUrl: issue.data.html_url,
+    };
+  } catch (err: unknown) {
+    if (err instanceof UserFacingError) throw err;
+    if (err instanceof ValidationError) return { error: 'validation error', detail: err.message, code: VALIDATION_ERROR_CODE };
+    if (typeof err === 'object' && err !== null && 'status' in err) {
+      const status = (err as { status?: number }).status;
+      if (status === 410) throw new UserFacingError('ISSUES_DISABLED', 403, 'Issue の作成が無効化されている。');
+      if (status === 401 || status === 403) throw new UserFacingError('FORBIDDEN', 403, 'Issue を作成する権限がない。');
+    }
+    if (err instanceof Error) return { error: 'failed to create issue', detail: err.message };
+    return { error: 'failed to create issue', detail: String(err) };
   }
 };
 
@@ -292,3 +346,31 @@ const _createOrGetPR = async (
 const _isDeleteFile = (file: RepoFile): file is RepoFileDelete => file.operation === 'delete';
 
 const _isUpsertFile = (file: RepoFile): file is RepoFileUpsert => file.operation === undefined || file.operation === 'upsert';
+
+const _assertIssuePayload = (payload: IssuePayload): void => {
+  if (!payload?.title?.trim()) throw new ValidationError('title は必須');
+  if (payload.body !== undefined && typeof payload.body !== 'string') throw new ValidationError('body は string で指定する');
+  if (payload.labels !== undefined) {
+    if (!Array.isArray(payload.labels)) throw new ValidationError('labels は string 配列で指定する');
+    payload.labels.forEach((label) => {
+      if (typeof label !== 'string' || !label.trim()) {
+        throw new ValidationError('labels には空文字や非文字列を指定できない');
+      }
+    });
+  }
+  if (payload.assignees !== undefined) {
+    if (!Array.isArray(payload.assignees)) throw new ValidationError('assignees は string 配列で指定する');
+    payload.assignees.forEach((assignee) => {
+      if (typeof assignee !== 'string' || !assignee.trim()) {
+        throw new ValidationError('assignees には空文字や非文字列を指定できない');
+      }
+    });
+  }
+};
+
+const _normalizeStringArray = (values: string[] | undefined): string[] | undefined => {
+  if (!values) return undefined;
+  const normalized = values.map((value) => value.trim()).filter((value) => value.length > 0);
+  if (normalized.length === 0) return undefined;
+  return Array.from(new Set(normalized));
+};
