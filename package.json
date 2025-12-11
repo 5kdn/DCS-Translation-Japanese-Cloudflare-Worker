@@ -20,7 +20,7 @@
     "esbuild": "^0.27.1",
     "license-checker-rseidelsohn": "^4.4.2",
     "typescript": "^5.9.3",
-    "vitest": "~4.0.15",
+    "vitest": "~3.2.4",
     "wrangler": "^4.53.0"
   },
   "dependencies": {
