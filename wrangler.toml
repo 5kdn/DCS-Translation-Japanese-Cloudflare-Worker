@@ -23,6 +23,8 @@ enabled = true
 [vars]
 NODE_ENV = "production"
 AllowOrigins = "https://5kdn.github.io"
+TARGET_GH_APP_ID = "2459818"
+TARGET_GH_INSTALLATION_ID = "99269804"
 TARGET_GH_OWNER = "5kdn"
 TARGET_GH_REPO = "DCS-Translation-Japanese"
 TARGET_GH_DEFAULT_BRANCH = "master"
