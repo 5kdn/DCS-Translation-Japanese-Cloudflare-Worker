@@ -1,6 +1,5 @@
-import type { RouteConfigToTypedResponse } from '@hono/zod-openapi';
-import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { Octokit } from 'octokit';
+import { createRoute, OpenAPIHono, type RouteConfigToTypedResponse, z } from '@hono/zod-openapi';
+import { App as GitHubApp } from 'octokit';
 import { toUserFacingError } from '@/errors/userFacingError';
 import { formatErrorMessage } from '@/helpers/httpErrorMessageHelper';
 import { ensureUserPathSafe } from '@/helpers/pathSafetyHelper';
@@ -164,24 +163,35 @@ const createPr = async (
   env: AppEnv['Bindings'],
   req: PullRequestPayload,
 ): Promise<z.infer<typeof SuccessResponseSchema>['data']> => {
-  // env 必須値
-  const token = env.TARGET_GH_SECRET;
-  const owner = env.TARGET_GH_OWNER;
-  const repo = env.TARGET_GH_REPO;
-  assertEnv('TARGET_GH_SECRET', token);
-  assertEnv('TARGET_GH_OWNER', owner);
-  assertEnv('TARGET_GH_REPO', repo);
-  const defaultBranch = (env.TARGET_GH_DEFAULT_BRANCH || 'master').trim();
+  const {
+    TARGET_GH_APP_ID,
+    TARGET_GH_APP_PRIVATE_KEY,
+    TARGET_GH_INSTALLATION_ID,
+    TARGET_GH_OWNER,
+    TARGET_GH_REPO,
+    TARGET_GH_DEFAULT_BRANCH,
+  } = env as Record<string, string | undefined>;
+  assertEnv('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
+  assertEnv('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
+  assertEnv('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
+  assertEnv('TARGET_GH_OWNER', TARGET_GH_OWNER);
+  assertEnv('TARGET_GH_REPO', TARGET_GH_REPO);
 
-  // Octokit とコンテキスト
-  const octokit = new Octokit({ auth: token });
-  const ctx: GitHubContext = { octokit, owner, repo, defaultBranch };
+  const appId = Number(TARGET_GH_APP_ID);
+  const privateKey = TARGET_GH_APP_PRIVATE_KEY;
+  const installationId = Number(TARGET_GH_INSTALLATION_ID);
+  const owner = TARGET_GH_OWNER;
+  const repo = TARGET_GH_REPO;
+  const defaultBranch = (TARGET_GH_DEFAULT_BRANCH || 'master').trim();
 
-  // CreatePrRequest → PullRequestPayload 変換（同名フィールドを直接使用）
+  const app = new GitHubApp({ appId, privateKey });
+  const octokit = await app.getInstallationOctokit(installationId);
+
   const { prTitle, prBody, commitMessage, branchName, files } = req as CreatePrRequest;
+  const ctx: GitHubContext = { octokit, owner, repo, defaultBranch };
   const payload: PullRequestPayload = {
-    prTitle: prTitle,
-    prBody: prBody,
+    prTitle,
+    prBody,
     commitMessage,
     branchName,
     files,

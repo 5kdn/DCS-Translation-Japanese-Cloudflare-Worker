@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { Octokit } from 'octokit';
+import { App as GitHubApp } from 'octokit';
 import { toUserFacingError } from '@/errors/userFacingError';
 import { formatErrorMessage } from '@/helpers/httpErrorMessageHelper';
 import { getFilteredTreeItems } from '@/services/githubService';
@@ -93,27 +93,33 @@ r.openapi(route, async (c) => {
 export default r;
 
 /**
- * GitHub から DCSWorld, UserMissions 配下のファイル一覧(TreeItem[])を取得して返す。
- * 期待する環境変数:
- *  - GITHUB_TOKEN            : string
- *  - GITHUB_OWNER            : string
- *  - GITHUB_REPO             : string
- *  - GITHUB_DEFAULT_BRANCH   : string (任意、未設定時は 'main')
+ * @summary GitHub から DCSWorld, UserMissions 配下のファイル一覧(TreeItem[])を取得して返す。
  */
 const getTree = async (env: AppEnv['Bindings']): Promise<TreeItem[]> => {
-  const { TARGET_GH_SECRET, TARGET_GH_OWNER, TARGET_GH_REPO, TARGET_GH_DEFAULT_BRANCH } = env as Record<
-    string,
-    string | undefined
-  >;
+  const {
+    TARGET_GH_APP_ID,
+    TARGET_GH_APP_PRIVATE_KEY,
+    TARGET_GH_INSTALLATION_ID,
+    TARGET_GH_OWNER,
+    TARGET_GH_REPO,
+    TARGET_GH_DEFAULT_BRANCH,
+  } = env as Record<string, string | undefined>;
 
-  assertEnv('TARGET_GH_SECRET', TARGET_GH_SECRET);
+  assertEnv('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
+  assertEnv('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
+  assertEnv('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
   assertEnv('TARGET_GH_OWNER', TARGET_GH_OWNER);
   assertEnv('TARGET_GH_REPO', TARGET_GH_REPO);
 
-  const octokit = new Octokit({ auth: TARGET_GH_SECRET });
+  const appId = Number(TARGET_GH_APP_ID);
+  const privateKey = TARGET_GH_APP_PRIVATE_KEY;
+  const installationId = Number(TARGET_GH_INSTALLATION_ID);
   const owner = TARGET_GH_OWNER;
   const repo = TARGET_GH_REPO;
   const defaultBranch = (TARGET_GH_DEFAULT_BRANCH || 'master').trim();
+
+  const app = new GitHubApp({ appId, privateKey });
+  const octokit = await app.getInstallationOctokit(installationId);
 
   const items = await getFilteredTreeItems({
     octokit,

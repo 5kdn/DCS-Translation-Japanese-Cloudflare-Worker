@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { Octokit } from 'octokit';
+import { App as GitHubApp } from 'octokit';
 import { DEFAULT_DOWNLOAD_LIMITS } from '@/config/downloadLimits';
 import { RepositoryPathNotFoundError } from '@/errors/repositoryPathNotFoundError';
 import { UserFacingError } from '@/errors/userFacingError';
@@ -170,7 +170,7 @@ r.openapi(route, async (c) => {
 
   let ctx: GitHubContext;
   try {
-    ctx = createGitHubContext(bindings);
+    ctx = await createGitHubContext(bindings);
   } catch {
     return respondProblemDetails(
       c,
@@ -454,16 +454,36 @@ const applyRateLimitHeaders = (headers: Headers, rate: { limit: number; remainin
   headers.set('X-RateLimit-Reset', String(Math.floor(rate.resetAt / 1000)));
 };
 
-const createGitHubContext = (env: AppEnv['Bindings']): GitHubContext => {
-  const token = env.TARGET_GH_SECRET;
-  const owner = env.TARGET_GH_OWNER;
-  const repo = env.TARGET_GH_REPO;
-  assertEnv('TARGET_GH_SECRET', token);
-  assertEnv('TARGET_GH_OWNER', owner);
-  assertEnv('TARGET_GH_REPO', repo);
-  const defaultBranch = (env.TARGET_GH_DEFAULT_BRANCH || 'master').trim();
-  const octokit = new Octokit({ auth: token });
-  return { octokit, owner, repo, defaultBranch };
+const createGitHubContext = async (env: AppEnv['Bindings']): Promise<GitHubContext> => {
+  const {
+    TARGET_GH_APP_ID,
+    TARGET_GH_APP_PRIVATE_KEY,
+    TARGET_GH_INSTALLATION_ID,
+    TARGET_GH_OWNER,
+    TARGET_GH_REPO,
+    TARGET_GH_DEFAULT_BRANCH,
+  } = env as Record<string, string | undefined>;
+  assertEnv('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
+  assertEnv('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
+  assertEnv('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
+  assertEnv('TARGET_GH_OWNER', TARGET_GH_OWNER);
+  assertEnv('TARGET_GH_REPO', TARGET_GH_REPO);
+
+  if (TARGET_GH_APP_PRIVATE_KEY === undefined) {
+    console.error('環境変数 TARGET_GH_APP_PRIVATE_KEY が設定されていません');
+    throw Error('環境変数 TARGET_GH_APP_PRIVATE_KEY が設定されていません');
+  }
+  const appId = Number(TARGET_GH_APP_ID);
+  const privateKey = TARGET_GH_APP_PRIVATE_KEY;
+  const installationId = Number(TARGET_GH_INSTALLATION_ID);
+  const owner = TARGET_GH_OWNER;
+  const repo = TARGET_GH_REPO;
+  const defaultBranch = (TARGET_GH_DEFAULT_BRANCH || 'master').trim();
+
+  const app = new GitHubApp({ appId, privateKey });
+  const octokit = await app.getInstallationOctokit(installationId);
+
+  return { octokit, owner, repo, defaultBranch } as GitHubContext;
 };
 
 const assertEnv = (name: string, value: string | undefined): void => {

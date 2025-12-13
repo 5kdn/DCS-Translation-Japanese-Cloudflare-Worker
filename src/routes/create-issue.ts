@@ -1,6 +1,5 @@
-import type { RouteConfigToTypedResponse } from '@hono/zod-openapi';
-import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { Octokit } from 'octokit';
+import { createRoute, OpenAPIHono, type RouteConfigToTypedResponse, z } from '@hono/zod-openapi';
+import { App as GitHubApp } from 'octokit';
 import { toUserFacingError } from '@/errors/userFacingError';
 import { formatErrorMessage } from '@/helpers/httpErrorMessageHelper';
 import { createIssue, type GitHubContext } from '@/services/githubService';
@@ -17,12 +16,14 @@ const ApiResponseBase = <T extends z.ZodTypeAny>(data: T) =>
     message: z.string().optional(),
   });
 
-const IssueRequestSchema = z.object({
+const CreateIssueRequestSchema = z.object({
   title: z.string(),
   body: z.string().optional(),
   labels: z.array(z.string()).optional(),
   assignees: z.array(z.string()).optional(),
 });
+
+type CreateIssueRequest = z.infer<typeof CreateIssueRequestSchema>;
 
 const SuccessResponseSchema = ApiResponseBase(
   z.array(
@@ -63,7 +64,7 @@ const route = createRoute({
     body: {
       content: {
         'application/json': {
-          schema: IssueRequestSchema,
+          schema: CreateIssueRequestSchema,
         },
       },
       required: true,
@@ -99,7 +100,7 @@ const r = new OpenAPIHono<AppEnv>();
 
 r.openapi(route, async (c): Promise<CreateIssueRouteResponse> => {
   try {
-    const req = c.req.valid('json') as z.infer<typeof IssueRequestSchema>;
+    const req = c.req.valid('json') as z.infer<typeof CreateIssueRequestSchema>;
     const data: z.infer<typeof SuccessResponseSchema>['data'] = await createIssueHandler(c.env, req);
 
     const body: z.infer<typeof SuccessResponseSchema> = {
@@ -135,25 +136,43 @@ const createIssueHandler = async (
   env: AppEnv['Bindings'],
   req: IssuePayload,
 ): Promise<z.infer<typeof SuccessResponseSchema>['data']> => {
-  const token = env.TARGET_GH_SECRET;
-  const owner = env.TARGET_GH_OWNER;
-  const repo = env.TARGET_GH_REPO;
-  assertEnv('TARGET_GH_SECRET', token);
-  assertEnv('TARGET_GH_OWNER', owner);
-  assertEnv('TARGET_GH_REPO', repo);
-  const defaultBranch = (env.TARGET_GH_DEFAULT_BRANCH || 'master').trim();
+  const {
+    TARGET_GH_APP_ID,
+    TARGET_GH_APP_PRIVATE_KEY,
+    TARGET_GH_INSTALLATION_ID,
+    TARGET_GH_OWNER,
+    TARGET_GH_REPO,
+    TARGET_GH_DEFAULT_BRANCH,
+  } = env as Record<string, string | undefined>;
+  assertEnv('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
+  assertEnv('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
+  assertEnv('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
+  assertEnv('TARGET_GH_OWNER', TARGET_GH_OWNER);
+  assertEnv('TARGET_GH_REPO', TARGET_GH_REPO);
 
-  const octokit = new Octokit({ auth: token });
-  const ctx: GitHubContext = { octokit, owner, repo, defaultBranch };
+  const appId = Number(TARGET_GH_APP_ID);
+  const privateKey = TARGET_GH_APP_PRIVATE_KEY;
+  const installationId = Number(TARGET_GH_INSTALLATION_ID);
+  const owner = TARGET_GH_OWNER;
+  const repo = TARGET_GH_REPO;
+  const defaultBranch = (TARGET_GH_DEFAULT_BRANCH || 'master').trim();
 
-  const { title, body, labels, assignees } = req;
+  const app = new GitHubApp({ appId, privateKey });
+  const octokit = await app.getInstallationOctokit(installationId);
+
+  const { title, body, labels, assignees } = req as CreateIssueRequest;
+  const ctx: GitHubContext = {
+    octokit,
+    owner,
+    repo,
+    defaultBranch,
+  };
   const payload: IssuePayload = {
     title,
     body,
     labels,
     assignees,
   };
-
   const result = await createIssue(payload, ctx);
   if ('error' in result) {
     const detail = result.detail ? `: ${result.detail}` : '';
