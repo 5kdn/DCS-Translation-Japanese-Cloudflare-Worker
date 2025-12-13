@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.3.0...v1.4.0) (2025-12-13)
+
+
+### Features
+
+* issue 23 ([#24](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/24)) ([eedac55](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/eedac5546c63ef75bf3b165a97b483a1b7613b13)), closes [#23](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/23)
+
 ## [1.3.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.2.0...v1.3.0) (2025-12-11)
 
 
