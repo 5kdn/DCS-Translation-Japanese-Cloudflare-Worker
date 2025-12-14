@@ -95,7 +95,7 @@ jobs:
           --files THIRD-PARTY-NOTICES/files
 
       - name: Create update PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(licenses): regenerate THIRD-PARTY-NOTICES"
           title: "chore(licenses): regenerate THIRD-PARTY-NOTICES"
