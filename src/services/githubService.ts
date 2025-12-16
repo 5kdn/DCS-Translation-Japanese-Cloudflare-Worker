@@ -35,6 +35,45 @@ class ValidationError extends Error {
 type GitHubOperationFailure = { error: string; detail?: string; code?: typeof VALIDATION_ERROR_CODE };
 
 /**
+ * GitHub 上の Issue 一覧取得結果の 1 件分を表す。
+ */
+export type GetIssuesItem = {
+  /** Issue 番号 */
+  issueNumber: number;
+  /** Issue タイトル */
+  title: string;
+  /** Issue 本文 */
+  body: string | null;
+  /** Issue の URL */
+  issueUrl: string;
+  /** Issue の状態 */
+  state: 'open' | 'closed';
+  /** 最終更新日時（ISO 文字列） */
+  updatedAt: string;
+  /** 作成日時（ISO 文字列） */
+  createdAt: string;
+  /** クローズ日時（ISO 文字列。未クローズの場合は null） */
+  closedAt: string | null;
+  /** ラベル一覧 */
+  labels: string[];
+  /** アサインされたユーザー一覧 */
+  assignees: string[];
+};
+
+/**
+ * Issue 一覧取得時の入力を表す。
+ */
+export type GetIssuesRequest = {
+  /** 取得対象の状態を表す。 */
+  state?: 'open' | 'closed' | 'all';
+};
+
+/**
+ * Issue 一覧取得の結果を表す。
+ */
+export type GetIssuesResult = GetIssuesItem[];
+
+/**
  * GitHub リポジトリからツリー構造（ファイル一覧）を取得し、不要な項目を除外して返す。
  */
 export const getFilteredTreeItems = async (ctx: GitHubContext): Promise<TreeItem[]> => {
@@ -177,9 +216,60 @@ export const createIssue = async (payload: IssuePayload, ctx: GitHubContext): Pr
       const status = (err as { status?: number }).status;
       if (status === 410) throw new UserFacingError('ISSUES_DISABLED', 403, 'Issue の作成が無効化されている。');
       if (status === 401 || status === 403) throw new UserFacingError('FORBIDDEN', 403, 'Issue を作成する権限がない。');
+      if (status === 404) throw new UserFacingError('NOT_FOUND', 404, 'リポジトリが見つからない。');
     }
     if (err instanceof Error) return { error: 'failed to create issue', detail: err.message };
     return { error: 'failed to create issue', detail: String(err) };
+  }
+};
+
+/**
+ * @summary GitHub 上の Issue 一覧を取得する
+ * @param ctx Octokit や owner/repo などの GitHub コンテキストを受け取る。
+ */
+export const getIssues = async (
+  ctx: GitHubContext,
+  req: GetIssuesRequest = {},
+): Promise<GetIssuesResult | GitHubOperationFailure> => {
+  const { octokit, owner, repo } = ctx;
+  try {
+    const result = await octokit.rest.issues.listForRepo({
+      owner,
+      repo,
+      state: req.state ?? 'open',
+      sort: 'updated',
+      direction: 'desc',
+      per_page: 100,
+    });
+
+    return result.data
+      .filter((issue) => !issue.pull_request)
+      .map((issue) => ({
+        issueNumber: issue.number,
+        title: issue.title,
+        body: issue.body ?? null,
+        issueUrl: issue.html_url,
+        state: issue.state as 'open' | 'closed',
+        closedAt: issue.closed_at ?? null,
+        updatedAt: issue.updated_at,
+        createdAt: issue.created_at,
+        labels: issue.labels
+          .map((label) => (typeof label === 'string' ? label : label?.name))
+          .filter((name): name is string => typeof name === 'string' && name.length > 0),
+        assignees: (issue.assignees ?? [])
+          .map((assignee) => assignee?.login)
+          .filter((login): login is string => typeof login === 'string' && login.length > 0),
+      }));
+  } catch (err: unknown) {
+    if (err instanceof UserFacingError) throw err;
+    if (err instanceof ValidationError) return { error: 'validation error', detail: err.message, code: VALIDATION_ERROR_CODE };
+    if (typeof err === 'object' && err !== null && 'status' in err) {
+      const status = (err as { status?: number }).status;
+      if (status === 401 || status === 403) throw new UserFacingError('FORBIDDEN', 403, 'Issue 一覧を取得する権限がない。');
+      if (status === 404) throw new UserFacingError('NOT_FOUND', 404, 'リポジトリが見つからない。');
+    }
+    if (err instanceof Error) return { error: 'failed to get issues', detail: err.message };
+    return { error: 'failed to get issues', detail: String(err) };
   }
 };
 

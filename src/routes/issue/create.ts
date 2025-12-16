@@ -1,6 +1,7 @@
-import { createRoute, OpenAPIHono, type RouteConfigToTypedResponse, z } from '@hono/zod-openapi';
+import { createRoute, type OpenAPIHono, type RouteConfigToTypedResponse, z } from '@hono/zod-openapi';
 import { App as GitHubApp } from 'octokit';
 import { toUserFacingError } from '@/errors/userFacingError';
+import { getRequiredEnvNumber, getRequiredEnvString } from '@/helpers/environmentHelper';
 import { formatErrorMessage } from '@/helpers/httpErrorMessageHelper';
 import { createIssue, type GitHubContext } from '@/services/githubService';
 import type { AppEnv } from '@/types/env';
@@ -16,15 +17,14 @@ const ApiResponseBase = <T extends z.ZodTypeAny>(data: T) =>
     message: z.string().optional(),
   });
 
-const CreateIssueRequestSchema = z.object({
+const RequestSchema = z.object({
   title: z.string(),
   body: z.string().optional(),
   labels: z.array(z.string()).optional(),
   assignees: z.array(z.string()).optional(),
 });
 
-type CreateIssueRequest = z.infer<typeof CreateIssueRequestSchema>;
-
+/** 成功時のレスポンススキーマ。 */
 const SuccessResponseSchema = ApiResponseBase(
   z.array(
     z.object({
@@ -33,15 +33,20 @@ const SuccessResponseSchema = ApiResponseBase(
     }),
   ),
 );
+
+/** 失敗時のレスポンススキーマ。 */
 const ErrorResponseSchema = ApiResponseBase(z.null());
+
+type CreateIssueRequest = z.infer<typeof RequestSchema>;
+type CreateIssueRouteResponse = RouteConfigToTypedResponse<typeof route>;
 
 /**
  * OpenAPI route
  */
 const route = createRoute({
   method: 'post',
-  path: '/create-issue',
-  tags: ['create-issue'],
+  path: '/create',
+  tags: ['issue'],
   summary: 'GitHub に Issue を作成する',
   description:
     '指定のリポジトリに Issue を作成します。\n' +
@@ -58,13 +63,14 @@ const route = createRoute({
     'エラー:\n' +
     '- 400: リクエスト不正\n' +
     '- 403: 権限不足\n' +
+    '- 404: リポジトリが見つからない\n' +
     '- 422: 処理不能（内容不整合など）\n' +
     '- 500: サーバーエラー',
   request: {
     body: {
       content: {
         'application/json': {
-          schema: CreateIssueRequestSchema,
+          schema: RequestSchema,
         },
       },
       required: true,
@@ -83,6 +89,10 @@ const route = createRoute({
       description: 'forbidden',
       content: { 'application/json': { schema: ErrorResponseSchema } },
     },
+    404: {
+      description: 'not found',
+      content: { 'application/json': { schema: ErrorResponseSchema } },
+    },
     422: {
       description: 'unprocessable entity',
       content: { 'application/json': { schema: ErrorResponseSchema } },
@@ -94,44 +104,48 @@ const route = createRoute({
   },
 });
 
-type CreateIssueRouteResponse = RouteConfigToTypedResponse<typeof route>;
+export const registerIssueCreateRoutes = (app: OpenAPIHono<AppEnv>) => {
+  app.openapi(route, async (c): Promise<CreateIssueRouteResponse> => {
+    try {
+      const request = c.req.valid('json') as z.infer<typeof RequestSchema>;
 
-const r = new OpenAPIHono<AppEnv>();
+      const data: z.infer<typeof SuccessResponseSchema>['data'] = await createIssueHandler(c.env, request);
 
-r.openapi(route, async (c): Promise<CreateIssueRouteResponse> => {
-  try {
-    const req = c.req.valid('json') as z.infer<typeof CreateIssueRequestSchema>;
-    const data: z.infer<typeof SuccessResponseSchema>['data'] = await createIssueHandler(c.env, req);
-
-    const body: z.infer<typeof SuccessResponseSchema> = {
-      success: true,
-      data,
-    };
-    return c.json<typeof body, 200>(body, 200);
-  } catch (err) {
-    const userError = toUserFacingError(err);
-    const errBody: z.infer<typeof ErrorResponseSchema> = {
-      success: false,
-      data: null,
-      message: formatErrorMessage(userError),
-    };
-    const status = toErrorStatus(userError.status);
-    const respondError = <S extends ErrorStatus>(code: S) => c.json<typeof errBody, S>(errBody, code);
-    switch (status) {
-      case 400:
-        return respondError(400);
-      case 403:
-        return respondError(403);
-      case 422:
-        return respondError(422);
-      default:
-        return respondError(500);
+      const body: z.infer<typeof SuccessResponseSchema> = {
+        success: true,
+        data,
+      };
+      return c.json<typeof body, 200>(body, 200);
+    } catch (err: unknown) {
+      const userError = toUserFacingError(err);
+      const errBody: z.infer<typeof ErrorResponseSchema> = {
+        success: false,
+        data: null,
+        message: formatErrorMessage(userError),
+      };
+      const status = toErrorStatus(userError.status);
+      const respondError = <S extends ErrorStatus>(code: S) => c.json<typeof errBody, S>(errBody, code);
+      switch (status) {
+        case 400:
+          return respondError(400);
+        case 403:
+          return respondError(403);
+        case 404:
+          return respondError(404);
+        case 422:
+          return respondError(422);
+        default:
+          return respondError(500);
+      }
     }
-  }
-});
+  });
+};
 
-export default r;
+/** internal */
 
+/**
+ * @summary GitHub の 対象のリポジトリに Issue を作成する。
+ */
 const createIssueHandler = async (
   env: AppEnv['Bindings'],
   req: IssuePayload,
@@ -144,17 +158,11 @@ const createIssueHandler = async (
     TARGET_GH_REPO,
     TARGET_GH_DEFAULT_BRANCH,
   } = env as Record<string, string | undefined>;
-  assertEnv('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
-  assertEnv('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
-  assertEnv('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
-  assertEnv('TARGET_GH_OWNER', TARGET_GH_OWNER);
-  assertEnv('TARGET_GH_REPO', TARGET_GH_REPO);
-
-  const appId = Number(TARGET_GH_APP_ID);
-  const privateKey = TARGET_GH_APP_PRIVATE_KEY;
-  const installationId = Number(TARGET_GH_INSTALLATION_ID);
-  const owner = TARGET_GH_OWNER;
-  const repo = TARGET_GH_REPO;
+  const appId = getRequiredEnvNumber('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
+  const privateKey = getRequiredEnvString('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
+  const installationId = getRequiredEnvNumber('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
+  const owner = getRequiredEnvString('TARGET_GH_OWNER', TARGET_GH_OWNER);
+  const repo = getRequiredEnvString('TARGET_GH_REPO', TARGET_GH_REPO);
   const defaultBranch = (TARGET_GH_DEFAULT_BRANCH || 'master').trim();
 
   const app = new GitHubApp({ appId, privateKey });
@@ -187,18 +195,12 @@ const createIssueHandler = async (
   ];
 };
 
-/* internal */
-function assertEnv(name: string, v: string | undefined): asserts v is string {
-  if (!v || !v.trim()) {
-    throw new Error(`missing required env: ${name}`);
-  }
-}
-
-type ErrorStatus = 400 | 403 | 422 | 500;
+type ErrorStatus = 400 | 403 | 404 | 422 | 500;
 
 const toErrorStatus = (status: number | undefined): ErrorStatus => {
   if (status === 400) return 400;
   if (status === 403) return 403;
+  if (status === 404) return 404;
   if (status === 422) return 422;
   return 500;
 };

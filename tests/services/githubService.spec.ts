@@ -499,6 +499,16 @@ describe('createIssue', () => {
     await expect(createIssue({ title: 'bug' }, ctxOf(octokit))).rejects.toBeInstanceOf(UserFacingError);
   });
 
+  it('リポジトリが見つからない場合は UserFacingError を投げる', async () => {
+    const { octokit, rest } = makeOctokit();
+    rest.issues.create.mockRejectedValue({ status: 404 });
+
+    await expect(createIssue({ title: 'bug' }, ctxOf(octokit))).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+      status: 404,
+    });
+  });
+
   it('未知のエラーは failure で返す', async () => {
     const { octokit, rest } = makeOctokit();
     const error = Object.assign(new Error('boom'), { status: 500 });
