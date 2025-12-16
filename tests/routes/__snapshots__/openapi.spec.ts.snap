@@ -12,201 +12,6 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
   },
   "openapi": "3.1.0",
   "paths": {
-    "/create-issue": {
-      "post": {
-        "description": "指定のリポジトリに Issue を作成します。
-
-リクエスト:
-- title: Issue のタイトル（必須）
-- body: Issue の本文（任意）
-- labels: 適用するラベル配列（任意）
-- assignees: アサインするユーザー配列（任意）
-
-応答:
-- 成功時は issueNumber と issueUrl を含む配列を返します。
-
-エラー:
-- 400: リクエスト不正
-- 403: 権限不足
-- 422: 処理不能（内容不整合など）
-- 500: サーバーエラー",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "properties": {
-                  "assignees": {
-                    "items": {
-                      "type": "string",
-                    },
-                    "type": "array",
-                  },
-                  "body": {
-                    "type": "string",
-                  },
-                  "labels": {
-                    "items": {
-                      "type": "string",
-                    },
-                    "type": "array",
-                  },
-                  "title": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "title",
-                ],
-                "type": "object",
-              },
-            },
-          },
-          "required": true,
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "items": {
-                        "properties": {
-                          "issueNumber": {
-                            "type": "integer",
-                          },
-                          "issueUrl": {
-                            "type": "string",
-                          },
-                        },
-                        "required": [
-                          "issueNumber",
-                          "issueUrl",
-                        ],
-                        "type": "object",
-                      },
-                      "nullable": true,
-                      "type": "array",
-                    },
-                    "message": {
-                      "type": "string",
-                    },
-                    "success": {
-                      "type": "boolean",
-                    },
-                  },
-                  "required": [
-                    "success",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "ok",
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "nullable": true,
-                    },
-                    "message": {
-                      "type": "string",
-                    },
-                    "success": {
-                      "type": "boolean",
-                    },
-                  },
-                  "required": [
-                    "success",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "bad request",
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "nullable": true,
-                    },
-                    "message": {
-                      "type": "string",
-                    },
-                    "success": {
-                      "type": "boolean",
-                    },
-                  },
-                  "required": [
-                    "success",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "forbidden",
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "nullable": true,
-                    },
-                    "message": {
-                      "type": "string",
-                    },
-                    "success": {
-                      "type": "boolean",
-                    },
-                  },
-                  "required": [
-                    "success",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "unprocessable entity",
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "nullable": true,
-                    },
-                    "message": {
-                      "type": "string",
-                    },
-                    "success": {
-                      "type": "boolean",
-                    },
-                  },
-                  "required": [
-                    "success",
-                  ],
-                  "type": "object",
-                },
-              },
-            },
-            "description": "error",
-          },
-        },
-        "summary": "GitHub に Issue を作成する",
-        "tags": [
-          "create-issue",
-        ],
-      },
-    },
     "/create-pr": {
       "post": {
         "description": "指定のブランチにファイル変更をコミットし、Pull Request を作成します。
@@ -1012,6 +817,469 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
         "summary": "アプリケーションのヘルスチェック",
         "tags": [
           "health",
+        ],
+      },
+    },
+    "/issue/create": {
+      "post": {
+        "description": "指定のリポジトリに Issue を作成します。
+
+リクエスト:
+- title: Issue のタイトル（必須）
+- body: Issue の本文（任意）
+- labels: 適用するラベル配列（任意）
+- assignees: アサインするユーザー配列（任意）
+
+応答:
+- 成功時は issueNumber と issueUrl を含む配列を返します。
+
+エラー:
+- 400: リクエスト不正
+- 403: 権限不足
+- 404: リポジトリが見つからない
+- 422: 処理不能（内容不整合など）
+- 500: サーバーエラー",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "assignees": {
+                    "items": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "body": {
+                    "type": "string",
+                  },
+                  "labels": {
+                    "items": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "title": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "title",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "issueNumber": {
+                            "type": "integer",
+                          },
+                          "issueUrl": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "issueNumber",
+                          "issueUrl",
+                        ],
+                        "type": "object",
+                      },
+                      "nullable": true,
+                      "type": "array",
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "ok",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "bad request",
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "forbidden",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "not found",
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unprocessable entity",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "error",
+          },
+        },
+        "summary": "GitHub に Issue を作成する",
+        "tags": [
+          "issue",
+        ],
+      },
+    },
+    "/issue/list": {
+      "post": {
+        "description": "指定のリポジトリに対して Issue 一覧を取得し、JSON として返却する。
+
+クエリ:
+- state: open | closed | all（省略時は open）
+
+応答:
+- 成功時は Issue 情報（配列）を返却する。
+
+エラー:
+- 400: リクエスト不正
+- 403: 権限不足
+- 404: リポジトリが見つからない
+- 422: 処理不能（内容不整合など）
+- 500: サーバーエラー",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "enum": [
+                "open",
+                "closed",
+                "all",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "assignees": {
+                            "items": {
+                              "type": "string",
+                            },
+                            "type": "array",
+                          },
+                          "body": {
+                            "nullable": true,
+                            "type": "string",
+                          },
+                          "closedAt": {
+                            "nullable": true,
+                            "type": "string",
+                          },
+                          "createdAt": {
+                            "type": "string",
+                          },
+                          "issueNumber": {
+                            "type": "integer",
+                          },
+                          "issueUrl": {
+                            "type": "string",
+                          },
+                          "labels": {
+                            "items": {
+                              "type": "string",
+                            },
+                            "type": "array",
+                          },
+                          "state": {
+                            "enum": [
+                              "open",
+                              "closed",
+                            ],
+                            "type": "string",
+                          },
+                          "title": {
+                            "type": "string",
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                          },
+                        },
+                        "required": [
+                          "issueNumber",
+                          "title",
+                          "body",
+                          "issueUrl",
+                          "state",
+                          "closedAt",
+                          "updatedAt",
+                          "createdAt",
+                          "labels",
+                          "assignees",
+                        ],
+                        "type": "object",
+                      },
+                      "nullable": true,
+                      "type": "array",
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "ok",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "bad request",
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "forbidden",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "not found",
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unprocessable entity",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "error",
+          },
+        },
+        "summary": "GitHub の Issue 一覧を取得する",
+        "tags": [
+          "issue",
         ],
       },
     },

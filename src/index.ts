@@ -1,11 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
-import createIssueRoute from '@/routes/create-issue';
 import createPrRoute from '@/routes/create-pr';
 import docsRoute from '@/routes/docs';
 import downloadFilePathsRoute from '@/routes/download-file-paths';
 import downloadFilesRoute from '@/routes/download-files';
 import healthRoute from '@/routes/health';
+import { issueRoutes } from '@/routes/issue';
 import treeRoute from '@/routes/tree';
 import type { AppEnv } from '@/types/env';
 
@@ -48,11 +48,11 @@ app.use(
 );
 
 // mount routes
-app.route('/', createIssueRoute);
 app.route('/', createPrRoute);
 app.route('/', docsRoute);
 app.route('/', downloadFilesRoute);
 app.route('/', downloadFilePathsRoute);
+app.route('/issue', issueRoutes);
 app.route('/', healthRoute);
 app.route('/', treeRoute);
 export default app;
