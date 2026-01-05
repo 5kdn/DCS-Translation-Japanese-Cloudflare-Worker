@@ -42,13 +42,12 @@ describe('POST /issue/create', () => {
     };
     mockedCreateIssue.mockResolvedValueOnce(issueResult);
 
-    const response = await app.request(
-      'http://localhost/issue/create',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/issue/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 
@@ -83,13 +82,12 @@ describe('POST /issue/create', () => {
       detail: 'payload invalid',
     });
 
-    const response = await app.request(
-      'http://localhost/issue/create',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/issue/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 
@@ -110,13 +108,12 @@ describe('POST /issue/create', () => {
     };
     mockedCreateIssue.mockRejectedValueOnce(new UserFacingError('NOT_FOUND', 404, 'リポジトリが見つからない。'));
 
-    const response = await app.request(
-      'http://localhost/issue/create',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/issue/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 
@@ -137,13 +134,12 @@ describe('POST /issue/create', () => {
     };
     mockedCreateIssue.mockRejectedValueOnce(new UserFacingError('FORBIDDEN', 403, 'Issue を作成する権限がない。'));
 
-    const response = await app.request(
-      'http://localhost/issue/create',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/issue/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 
@@ -164,13 +160,12 @@ describe('POST /issue/create', () => {
     };
     mockedCreateIssue.mockRejectedValueOnce(new UserFacingError('UNPROCESSABLE_ENTITY', 422, '処理できないリクエストである。'));
 
-    const response = await app.request(
-      'http://localhost/issue/create',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/issue/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 
@@ -191,13 +186,12 @@ describe('POST /issue/create', () => {
     };
     mockedCreateIssue.mockRejectedValueOnce(new Error('boom'));
 
-    const response = await app.request(
-      'http://localhost/issue/create',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/issue/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 

@@ -48,13 +48,12 @@ describe('POST /create-pr', () => {
     };
     mockedCreatePullRequest.mockResolvedValueOnce(prResult);
 
-    const response = await app.request(
-      'http://localhost/create-pr',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/create-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 
@@ -94,13 +93,12 @@ describe('POST /create-pr', () => {
       detail: 'payload invalid',
     });
 
-    const response = await app.request(
-      'http://localhost/create-pr',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/create-pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
-      },
+      }),
       env,
     );
 

@@ -1043,19 +1043,7 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
     "/issue/list": {
       "post": {
         "description": "指定のリポジトリに対して Issue 一覧を取得し、JSON として返却する。
-
-クエリ:
-- state: open | closed | all（省略時は open）
-
-応答:
-- 成功時は Issue 情報（配列）を返却する。
-
-エラー:
-- 400: リクエスト不正
-- 403: 権限不足
-- 404: リポジトリが見つからない
-- 422: 処理不能（内容不整合など）
-- 500: サーバーエラー",
+",
         "parameters": [
           {
             "in": "query",
@@ -1285,7 +1273,8 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
     },
     "/tree": {
       "get": {
-        "description": "指定された GitHub リポジトリのデフォルトブランチから、DCSWorld, UserMissions 配下のファイル一覧（TreeItem配列）を取得して返す。",
+        "description": "指定された GitHub リポジトリのデフォルトブランチから、DCSWorld, UserMissions 配下のファイル一覧（TreeItem配列）を取得して返す。
+",
         "responses": {
           "200": {
             "content": {
@@ -1314,6 +1303,11 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
                             ],
                             "type": "string",
                           },
+                          "updatedAt": {
+                            "format": "date-time",
+                            "nullable": true,
+                            "type": "string",
+                          },
                           "url": {
                             "type": "string",
                           },
@@ -1323,6 +1317,7 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
                           "mode",
                           "type",
                           "sha",
+                          "updatedAt",
                         ],
                         "type": "object",
                       },
@@ -1353,6 +1348,9 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
               "application/json": {
                 "schema": {
                   "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
                     "message": {
                       "type": "string",
                     },
@@ -1365,7 +1363,7 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
                   },
                   "required": [
                     "success",
-                    "message",
+                    "data",
                   ],
                   "type": "object",
                 },
@@ -1378,6 +1376,9 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
               "application/json": {
                 "schema": {
                   "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
                     "message": {
                       "type": "string",
                     },
@@ -1390,7 +1391,7 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
                   },
                   "required": [
                     "success",
-                    "message",
+                    "data",
                   ],
                   "type": "object",
                 },
@@ -1403,6 +1404,9 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
               "application/json": {
                 "schema": {
                   "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
                     "message": {
                       "type": "string",
                     },
@@ -1415,7 +1419,7 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
                   },
                   "required": [
                     "success",
-                    "message",
+                    "data",
                   ],
                   "type": "object",
                 },
@@ -1428,6 +1432,9 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
               "application/json": {
                 "schema": {
                   "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
                     "message": {
                       "type": "string",
                     },
@@ -1440,7 +1447,7 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
                   },
                   "required": [
                     "success",
-                    "message",
+                    "data",
                   ],
                   "type": "object",
                 },
@@ -1449,9 +1456,226 @@ exports[`openapi.json > OpenAPIスキーマをスナップショット検証す�
             "description": "error",
           },
         },
-        "summary": "GitHub リポジトリのツリー構造を取得",
+        "summary": "GitHub リポジトリのツリー構造を取得する",
         "tags": [
           "tree",
+        ],
+      },
+    },
+    "/tree-metadata/upsert": {
+      "post": {
+        "description": "GitHub の ファイルの作成・更新日を更新します。
+",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "minLength": 1,
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                    },
+                    "updatedAt": {
+                      "type": "integer",
+                    },
+                  },
+                  "required": [
+                    "path",
+                    "updatedAt",
+                  ],
+                  "type": "object",
+                },
+                "maxItems": 1000,
+                "type": "array",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "ok",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "bad request",
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unauthorized",
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "forbidden",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "not found",
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "unprocessable entity",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "nullable": true,
+                    },
+                    "message": {
+                      "type": "string",
+                    },
+                    "success": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "success",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "error",
+          },
+        },
+        "summary": "GitHub の ファイルの作成・更新日を更新する",
+        "tags": [
+          "tree-metadata",
         ],
       },
     },
