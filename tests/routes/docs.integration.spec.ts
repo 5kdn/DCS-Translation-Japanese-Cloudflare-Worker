@@ -10,7 +10,7 @@ const createEnv = (): AppEnv['Bindings'] => ({
 describe('GET /docs', () => {
   it('Swagger UI のHTMLを返す', async () => {
     const env = createEnv();
-    const response = await app.request('http://localhost/docs', { method: 'GET' }, env);
+    const response = await app.fetch(new Request('http://localhost/docs', { method: 'GET' }), env);
 
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('text/html');
