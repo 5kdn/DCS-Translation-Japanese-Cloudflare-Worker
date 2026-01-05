@@ -96,7 +96,17 @@ export const getFilteredTreeItems = async (ctx: GitHubContext): Promise<TreeItem
   const filtered: TreeBlob[] = files.filter(
     (item): item is TreeBlob => item.type === 'blob' && typeof item.path === 'string' && isFilePathAllowed(item.path),
   );
-  return filtered;
+  return filtered.map(
+    (item): TreeItem => ({
+      path: item.path,
+      mode: item.mode ?? '',
+      type: 'blob',
+      sha: item.sha ?? '',
+      size: item.size,
+      url: item.url,
+      updatedAt: null,
+    }),
+  );
 };
 
 /**

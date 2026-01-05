@@ -10,7 +10,7 @@ const createEnv = (): AppEnv['Bindings'] => ({
 describe('GET /health', () => {
   it('稼働状態を返す', async () => {
     const env = createEnv();
-    const response = await app.request('http://localhost/health', { method: 'GET' }, env);
+    const response = await app.fetch(new Request('http://localhost/health', { method: 'GET' }), env);
 
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('application/json');
