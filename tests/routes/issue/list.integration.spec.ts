@@ -47,7 +47,7 @@ describe('POST /issue/list', () => {
     ];
     mockedGetIssues.mockResolvedValueOnce(issueItems);
 
-    const response = await app.request('http://localhost/issue/list?state=all', { method: 'POST' }, env);
+    const response = await app.fetch(new Request('http://localhost/issue/list?state=all', { method: 'POST' }), env);
 
     expect(mockedGetIssues).toHaveBeenCalledTimes(1);
     const [ctx, req] = mockedGetIssues.mock.calls[0] ?? [];
@@ -72,7 +72,7 @@ describe('POST /issue/list', () => {
       detail: 'unexpected',
     });
 
-    const response = await app.request('http://localhost/issue/list', { method: 'POST' }, env);
+    const response = await app.fetch(new Request('http://localhost/issue/list', { method: 'POST' }), env);
 
     expect(mockedGetIssues).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(500);
@@ -88,7 +88,7 @@ describe('POST /issue/list', () => {
     const env = createEnv();
     mockedGetIssues.mockRejectedValueOnce(new UserFacingError('NOT_FOUND', 404, 'リポジトリが見つからない。'));
 
-    const response = await app.request('http://localhost/issue/list', { method: 'POST' }, env);
+    const response = await app.fetch(new Request('http://localhost/issue/list', { method: 'POST' }), env);
 
     expect(mockedGetIssues).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(404);

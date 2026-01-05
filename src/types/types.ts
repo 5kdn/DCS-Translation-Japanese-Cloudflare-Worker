@@ -5,6 +5,7 @@ export interface TreeItem {
   sha: string;
   size?: number | undefined;
   url?: string | undefined;
+  updatedAt: string | null;
 }
 
 /** API リクエストボディ */

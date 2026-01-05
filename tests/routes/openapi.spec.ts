@@ -9,7 +9,7 @@ describe('openapi.json', () => {
       AllowOrigins: '',
     };
 
-    const response = await app.request('http://localhost/openapi.json', { method: 'GET' }, env);
+    const response = await app.fetch(new Request('http://localhost/openapi.json', { method: 'GET' }), env);
     expect(response.status).toBe(200);
     const doc = await response.json();
     expect(doc).toMatchSnapshot({

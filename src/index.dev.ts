@@ -6,8 +6,10 @@ import downloadFilePathsRoute from '@/routes/download-file-paths';
 import downloadFilesRoute from '@/routes/download-files';
 import healthRoute from '@/routes/health';
 import { issueRoutes } from '@/routes/issue';
-import treeRoute from '@/routes/tree';
 import type { AppEnv } from '@/types/env';
+import { scheduled } from './handlers/scheduled';
+import { treeRoutes } from './routes/tree';
+import { treeMetadataRoutes } from './routes/tree-metadata';
 
 const packageJson = await import('../package.json', { assert: { type: 'json' } });
 
@@ -53,6 +55,11 @@ app.route('/', docsRoute);
 app.route('/', downloadFilesRoute);
 app.route('/', downloadFilePathsRoute);
 app.route('/issue', issueRoutes);
+app.route('/tree', treeRoutes);
+app.route('/tree-metadata', treeMetadataRoutes);
 app.route('/', healthRoute);
-app.route('/', treeRoute);
-export default app;
+
+export default {
+  fetch: app.fetch,
+  scheduled,
+};
