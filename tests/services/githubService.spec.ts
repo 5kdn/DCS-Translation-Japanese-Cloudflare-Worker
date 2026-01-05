@@ -118,17 +118,21 @@ describe('getFilteredTreeItems', () => {
     expect(items).toEqual([
       {
         path: 'DCSWorld/Mods/a.txt',
+        mode: '',
         sha: 'sha-a',
         size: 10,
         url: 'u-a',
         type: 'blob',
+        updatedAt: null,
       },
       {
         path: 'UserMissions/Mission1/file.lua',
+        mode: '',
         sha: 'sha-u',
         size: 30,
         url: 'u-u',
         type: 'blob',
+        updatedAt: null,
       },
     ]);
     expect(rest.git.getTree).toHaveBeenCalledWith({

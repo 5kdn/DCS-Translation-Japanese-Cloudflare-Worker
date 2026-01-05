@@ -50,16 +50,15 @@ describe('POST /download-files', () => {
       throw new Error(`unexpected path ${path}`);
     });
 
-    const response = await app.request(
-      'http://localhost/download-files',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/download-files', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.1',
         },
         body: JSON.stringify({ paths: ['DCSWorld/Mods/A/file1.lua', './DCSWorld/Mods/A/file2.lua'] }),
-      },
+      }),
       env,
     );
 
@@ -93,16 +92,15 @@ describe('POST /download-files', () => {
       content: encode('test'),
     });
 
-    const first = await app.request(
-      'http://localhost/download-files',
-      {
+    const first = await app.fetch(
+      new Request('http://localhost/download-files', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.2',
         },
         body: JSON.stringify({ paths: ['DCSWorld/file.lua'] }),
-      },
+      }),
       env,
     );
     const etag = first.headers.get('ETag');
@@ -115,9 +113,8 @@ describe('POST /download-files', () => {
       content: encode('test'),
     });
 
-    const second = await app.request(
-      'http://localhost/download-files',
-      {
+    const second = await app.fetch(
+      new Request('http://localhost/download-files', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +122,7 @@ describe('POST /download-files', () => {
           'If-None-Match': etag ?? '',
         },
         body: JSON.stringify({ paths: ['DCSWorld/file.lua'] }),
-      },
+      }),
       env,
     );
 
@@ -136,16 +133,15 @@ describe('POST /download-files', () => {
 
   it('重複パスで400を返却する', async () => {
     const env = createEnv();
-    const response = await app.request(
-      'http://localhost/download-files',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/download-files', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.3',
         },
         body: JSON.stringify({ paths: ['DCSWorld/file.lua', 'DCSWorld/file.lua'] }),
-      },
+      }),
       env,
     );
 
@@ -159,16 +155,15 @@ describe('POST /download-files', () => {
     const env = createEnv();
     mockedFetchRepositoryFile.mockRejectedValue(new RepositoryPathNotFoundError('not found'));
 
-    const response = await app.request(
-      'http://localhost/download-files',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/download-files', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.4',
         },
         body: JSON.stringify({ paths: ['DCSWorld/missing.lua'] }),
-      },
+      }),
       env,
     );
 
@@ -189,16 +184,15 @@ describe('POST /download-files', () => {
     let lastResponse: Response | undefined;
     for (let i = 0; i < 31; i += 1) {
       // eslint-disable-next-line no-await-in-loop
-      lastResponse = await app.request(
-        'http://localhost/download-files',
-        {
+      lastResponse = await app.fetch(
+        new Request('http://localhost/download-files', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'cf-connecting-ip': '10.0.0.5',
           },
           body: JSON.stringify({ paths: ['DCSWorld/file.lua'] }),
-        },
+        }),
         env,
       );
       if (lastResponse.status === 429) break;

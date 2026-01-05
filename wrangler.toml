@@ -8,6 +8,9 @@ compatibility_date = "2025-09-15"
 [observability]
 enabled = true
 
+[triggers]
+crons = ["0 21 11 * *"]
+
 # Smart Placement
 # Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 # [placement]
@@ -17,6 +20,17 @@ enabled = true
 # Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
 # databases, object storage, AI inference, real-time communication and more.
 # https://developers.cloudflare.com/workers/runtime-apis/bindings/
+
+# D1 Database
+[[d1_databases]]
+binding = "TREE_METADATA_DB"
+database_name = "tree-metadata-db"
+database_id = "912553b3-bdeb-42ee-8da1-cbb43c586bd6"
+
+[[d1_databases]]
+binding = "JWT_REPLAY_DB"
+database_name = "jwt-replay-db"
+database_id = "da5d4ee8-05a6-428c-b45d-acebfe90b05a"
 
 # Environment Variables
 # https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables

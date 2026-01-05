@@ -15,3 +15,10 @@ export const getRequiredEnvNumber = (name: string, v: string | undefined): numbe
 
   return n;
 };
+
+export const getRequiredEnvD1Database = (name: string, v: D1Database | undefined): D1Database => {
+  if (!v) {
+    throw new Error(`missing required env: ${name}`);
+  }
+  return v;
+};

@@ -17,16 +17,15 @@ const createEnv = (): AppEnv['Bindings'] => ({
 describe('POST /download-file-paths', () => {
   it('正常にURL一覧を返却する', async () => {
     const env = createEnv();
-    const response = await app.request(
-      'http://localhost/download-file-paths',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/download-file-paths', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.10',
         },
         body: JSON.stringify({ paths: ['DCSWorld/Mods/A/file1.lua', 'DCSWorld/Mods/A/file2.lua'] }),
-      },
+      }),
       env,
     );
 
@@ -60,23 +59,21 @@ describe('POST /download-file-paths', () => {
 
   it('ETag が一致する場合に 304 を返却する', async () => {
     const env = createEnv();
-    const first = await app.request(
-      'http://localhost/download-file-paths',
-      {
+    const first = await app.fetch(
+      new Request('http://localhost/download-file-paths', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.11',
         },
         body: JSON.stringify({ paths: ['DCSWorld/file.lua'] }),
-      },
+      }),
       env,
     );
     const etag = first.headers.get('ETag') ?? '';
 
-    const second = await app.request(
-      'http://localhost/download-file-paths',
-      {
+    const second = await app.fetch(
+      new Request('http://localhost/download-file-paths', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +81,7 @@ describe('POST /download-file-paths', () => {
           'If-None-Match': etag,
         },
         body: JSON.stringify({ paths: ['DCSWorld/file.lua'] }),
-      },
+      }),
       env,
     );
 
@@ -95,16 +92,15 @@ describe('POST /download-file-paths', () => {
 
   it('不許可パスで 400 を返却する', async () => {
     const env = createEnv();
-    const response = await app.request(
-      'http://localhost/download-file-paths',
-      {
+    const response = await app.fetch(
+      new Request('http://localhost/download-file-paths', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'cf-connecting-ip': '10.0.0.12',
         },
         body: JSON.stringify({ paths: ['/secret/file'] }),
-      },
+      }),
       env,
     );
 
