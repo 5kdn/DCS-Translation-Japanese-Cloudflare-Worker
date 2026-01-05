@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.4.0...v1.5.0) (2026-01-05)
+
+
+### Features
+
+* issue 関連のエントリーポイントを整理 ([#35](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/35)) ([be0e67c](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/be0e67c5258db8b53c83178f628de38e71505abd))
+* ツリー/メタデータ更新とJWT検証を追加 ([#43](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/43)) ([8e7773d](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/8e7773d9da650a79d6642dc252c1cdc18a47d167)), closes [#42](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/42)
+
 ## [1.4.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.3.0...v1.4.0) (2025-12-13)
 
 
