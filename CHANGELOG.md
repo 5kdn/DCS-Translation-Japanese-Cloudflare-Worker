@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.0...v1.5.1) (2026-01-14)
+
+
+### Fixes
+
+* JWT検証ミドルウェアのalg扱いに関する脆弱性(CVE-2026-22817, CVE-2026-22818)を解消するため、Honoを4.11.4へ更新する closes [#48](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/pull/48)
+
 ## [1.5.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.4.0...v1.5.0) (2026-01-05)
 
 
