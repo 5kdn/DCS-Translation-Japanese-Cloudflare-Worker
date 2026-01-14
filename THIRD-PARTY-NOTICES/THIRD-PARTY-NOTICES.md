@@ -5,4 +5,4 @@
 - [hono@4.11.3](https://github.com/honojs/hono) - MIT
 - [jose@6.1.3](https://github.com/panva/jose) - MIT
 - [octokit@5.0.5](https://github.com/octokit/octokit.js) - MIT
-- [zod@4.2.1](https://github.com/colinhacks/zod) - MIT
+- [zod@4.3.5](https://github.com/colinhacks/zod) - MIT
