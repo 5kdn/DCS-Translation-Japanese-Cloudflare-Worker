@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.0...v1.5.1) (2026-01-14)
+
+
+### Miscellaneous Chores
+
+* force patch release ([#49](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/49)) ([3369652](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/3369652b9fddea8ebf976c968f4934c6109e52c2))
+
 ## [1.5.0](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.4.0...v1.5.0) (2026-01-05)
 
 
