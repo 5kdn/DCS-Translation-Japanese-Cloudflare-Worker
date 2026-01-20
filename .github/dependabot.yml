@@ -19,6 +19,9 @@ updates:
   labels:
     - "dependencies"
     - "ci"
+  commit-message:
+    prefix: "chore(ci)"
+    include: "scope"
 
 # ─────────────────────────────────────────────────────────
 # 2) Node.js (pnpm-lock.yaml) の依存を監視
@@ -38,7 +41,8 @@ updates:
   open-pull-requests-limit: 10
   rebase-strategy: "auto"
   commit-message:
-    prefix: "deps"
+    prefix: "fix"
+    prefix-development: "chore"
     include: "scope"
   groups:
     wrangler-and-workers:
