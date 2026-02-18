@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.1...v1.5.2) (2026-02-18)
+
+
+### Bug Fixes
+
+* **deps:** bump the hono-and-openapi group across 1 directory with 3 updates ([#63](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/63)) ([ce72d7a](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/ce72d7a5f47ab9c1a6161a0ea6f21713e9625b9f))
+
 ## [1.5.1](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.0...v1.5.1) (2026-01-14)
 
 
