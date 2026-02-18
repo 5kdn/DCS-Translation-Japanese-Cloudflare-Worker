@@ -46,18 +46,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: pnpm install (prod only)
-        run: pnpm install --prod --frozen-lockfile
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Generate THIRD-PARTY-NOTICES (md + files)
-        run: >
-          rm -rf THIRD-PARTY-NOTICES
-          && pnpm dlx license-checker-rseidelsohn@4.4.2
-          --production
-          --excludePrivatePackages
-          --markdown
-          --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md
-          --files THIRD-PARTY-NOTICES/files
+        run: pnpm generate-licenses
 
       - name: Check diff
         run: |
@@ -81,18 +74,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: pnpm install (prod only)
-        run: pnpm install --prod --frozen-lockfile
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Generate THIRD-PARTY-NOTICES (md + files)
-        run: >
-          rm -rf THIRD-PARTY-NOTICES
-          && pnpm dlx license-checker-rseidelsohn@4.4.2
-          --production
-          --excludePrivatePackages
-          --markdown
-          --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md
-          --files THIRD-PARTY-NOTICES/files
+        run: pnpm generate-licenses
 
       - name: Create update PR
         uses: peter-evans/create-pull-request@v8
