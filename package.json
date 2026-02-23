@@ -14,9 +14,9 @@
     "generate-licenses": "node -e \"const fs=require('node:fs'); fs.rmSync('THIRD-PARTY-NOTICES/files',{ recursive:true, force:true }); fs.mkdirSync('THIRD-PARTY-NOTICES/files',{ recursive:true });\" && license-checker-rseidelsohn --markdown --production --excludePrivatePackages --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md --files THIRD-PARTY-NOTICES/files"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.13",
+    "@biomejs/biome": "^2.4.4",
     "@cloudflare/vitest-pool-workers": "^0.12.13",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.3.0",
     "esbuild": "^0.27.3",
     "license-checker-rseidelsohn": "^4.4.2",
     "typescript": "^5.9.3",
