@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.13",
-    "@cloudflare/vitest-pool-workers": "^0.12.13",
+    "@cloudflare/vitest-pool-workers": "^0.12.16",
     "@types/node": "^25.0.10",
     "esbuild": "^0.27.3",
     "license-checker-rseidelsohn": "^4.4.2",
