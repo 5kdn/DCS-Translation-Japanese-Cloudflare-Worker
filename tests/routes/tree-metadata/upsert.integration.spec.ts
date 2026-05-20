@@ -10,15 +10,19 @@ const mockVerifyGithubActionsIdToken = vi.fn();
 const mockUpsert = vi.fn();
 
 vi.mock('@/services/jwtVerificationService', () => ({
-  JwtVerificationService: vi.fn().mockImplementation(() => ({
-    verifyGithubActionsIdToken: mockVerifyGithubActionsIdToken,
-  })),
+  JwtVerificationService: vi.fn(
+    class MockJwtVerificationService {
+      verifyGithubActionsIdToken = mockVerifyGithubActionsIdToken;
+    },
+  ),
 }));
 
 vi.mock('@/services/treePathUpdatedAtService', () => ({
-  TreePathUpdatedAtService: vi.fn().mockImplementation(() => ({
-    upsert: mockUpsert,
-  })),
+  TreePathUpdatedAtService: vi.fn(
+    class MockTreePathUpdatedAtService {
+      upsert = mockUpsert;
+    },
+  ),
 }));
 
 const createEnv = (): AppEnv['Bindings'] => ({
