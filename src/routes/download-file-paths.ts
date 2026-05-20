@@ -368,7 +368,7 @@ const buildRawFileUrl = (ctx: GitHubContext, path: string): string => {
 };
 
 const assertEnv = (name: string, value: string | undefined): void => {
-  if (!value || !value.trim()) {
+  if (!value?.trim()) {
     throw new Error(`missing required env: ${name}`);
   }
 };

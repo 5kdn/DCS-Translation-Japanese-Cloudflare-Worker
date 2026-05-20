@@ -487,7 +487,7 @@ const createGitHubContext = async (env: AppEnv['Bindings']): Promise<GitHubConte
 };
 
 const assertEnv = (name: string, value: string | undefined): void => {
-  if (!value || !value.trim()) {
+  if (!value?.trim()) {
     throw new Error(`missing required env: ${name}`);
   }
 };
