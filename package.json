@@ -22,7 +22,7 @@
     "license-checker-rseidelsohn": "^4.4.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6",
-    "wrangler": "^4.66.0"
+    "wrangler": "^4.93.0"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.3",
