@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.3](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.2...v1.5.3) (2026-05-20)
+
+
+### Bug Fixes
+
+* **deps:** bump fflate from 0.8.2 to 0.8.3 ([#83](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/83)) ([dd9f82b](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/dd9f82b7a60af83dc5249ad3f2b04a5238b3c918))
+* **deps:** bump jose from 6.1.3 to 6.2.3 ([#80](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/80)) ([1db1862](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/1db18620c4d8cbab732103a179ac6227f8fcfdea))
+* **deps:** bump the hono-and-openapi group across 1 directory with 3 updates ([#86](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/86)) ([f72c729](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/f72c729af9b898040b4a8b050af842524c526b8e))
+
 ## [1.5.2](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.1...v1.5.2) (2026-02-18)
 
 
