@@ -13,9 +13,11 @@ vi.mock('@/services/githubService', () => ({
 const mockReadUpdatedAt = vi.fn();
 
 vi.mock('@/services/treePathUpdatedAtService', () => ({
-  TreePathUpdatedAtService: vi.fn().mockImplementation(() => ({
-    read: mockReadUpdatedAt,
-  })),
+  TreePathUpdatedAtService: vi.fn(
+    class MockTreePathUpdatedAtService {
+      read = mockReadUpdatedAt;
+    },
+  ),
 }));
 
 const createEnv = (): AppEnv['Bindings'] => ({
