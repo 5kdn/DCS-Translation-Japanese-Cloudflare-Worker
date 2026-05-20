@@ -122,6 +122,7 @@ describe('TreePathUpdatedAtService.upsert', () => {
 
   it('upsertで失敗した場合はリトライする', async () => {
     const error = new Error('boom');
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { db, batch, insertStatements } = makeDb({
       batchImpl: async () => {
         throw error;
@@ -136,5 +137,6 @@ describe('TreePathUpdatedAtService.upsert', () => {
       expect(statement.bind).toHaveBeenCalledWith('DCSWorld/a.txt', 1);
     });
     expect(batch).toHaveBeenCalledTimes(3);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[d1] tree_path_updated_at.upsert failed after retries', error);
   });
 });

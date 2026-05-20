@@ -10,11 +10,34 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['tests/**/*.spec.ts'],
     globals: true,
     typecheck: {
-      tsconfig: './tsconfig.json',
+      tsconfig: './tests/tsconfig.json',
     },
     environment: 'node',
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['tests/unit/**/*.test.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          include: ['tests/integration/**/*.integration.tests.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'e2e',
+          include: ['tests/e2e/**/*.spec.ts'],
+          fileParallelism: false,
+        },
+      },
+    ],
   },
 });
