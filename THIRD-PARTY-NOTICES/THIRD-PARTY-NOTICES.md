@@ -3,6 +3,6 @@
 - [@octokit/types@16.0.0](https://github.com/octokit/types.ts) - MIT
 - [fflate@0.8.2](https://github.com/101arrowz/fflate) - MIT
 - [hono@4.12.21](https://github.com/honojs/hono) - MIT
-- [jose@6.1.3](https://github.com/panva/jose) - MIT
+- [jose@6.2.3](https://github.com/panva/jose) - MIT
 - [octokit@5.0.5](https://github.com/octokit/octokit.js) - MIT
 - [zod@4.3.6](https://github.com/colinhacks/zod) - MIT
