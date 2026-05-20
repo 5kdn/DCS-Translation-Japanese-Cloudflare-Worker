@@ -27,8 +27,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: "24"
-  PNPM_VERSION: "10"
+  NODE_VERSION: "24.x"
+  PNPM_VERSION: "10.33.0"
 
 jobs:
   pr-licenses-check:

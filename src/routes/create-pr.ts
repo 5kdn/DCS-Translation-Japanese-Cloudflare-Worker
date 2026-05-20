@@ -220,7 +220,7 @@ const createPr = async (
 
 /* internal */
 function assertEnv(name: string, v: string | undefined): asserts v is string {
-  if (!v || !v.trim()) {
+  if (!v?.trim()) {
     throw new Error(`missing required env: ${name}`);
   }
 }

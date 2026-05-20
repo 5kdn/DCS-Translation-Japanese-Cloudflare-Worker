@@ -2,6 +2,7 @@
   "name": "dcs-translation-japanese-cloudflare-worker",
   "version": "1.5.2",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --script src/index.dev.ts",
@@ -14,12 +15,12 @@
     "generate-licenses": "node -e \"const fs=require('node:fs'); fs.rmSync('THIRD-PARTY-NOTICES/files',{ recursive:true, force:true }); fs.mkdirSync('THIRD-PARTY-NOTICES/files',{ recursive:true });\" && license-checker-rseidelsohn --markdown --production --excludePrivatePackages --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md --files THIRD-PARTY-NOTICES/files"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.8",
+    "@biomejs/biome": "^2.4.15",
     "@cloudflare/vitest-pool-workers": "^0.12.13",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.8.0",
     "esbuild": "^0.27.3",
     "license-checker-rseidelsohn": "^4.4.2",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "vitest": "~3.2.4",
     "wrangler": "^4.66.0"
   },

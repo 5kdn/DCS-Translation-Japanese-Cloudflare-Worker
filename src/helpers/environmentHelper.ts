@@ -1,5 +1,5 @@
 export const getRequiredEnvString = (name: string, v: string | undefined): string => {
-  if (!v || !v.trim()) {
+  if (!v?.trim()) {
     throw new Error(`missing required env: ${name}`);
   }
   return v;
