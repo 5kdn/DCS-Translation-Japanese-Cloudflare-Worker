@@ -2,7 +2,7 @@
 # Workflow Name : CI
 # Trigger       : pull_request to master
 # Purpose       :
-#   - 変更に対して Lint / UnitTest を実行
+#   - 変更に対して Lint / Unit / Integration / E2E を実行
 # ------------------------------------------------------------
 name: CI
 permissions:
@@ -61,4 +61,38 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm i --frozen-lockfile
-      - run: pnpm vitest --run
+      - run: pnpm test:unit
+
+  IntegrationTest:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm test:integration
+
+  E2ETest:
+    name: E2E Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm test:e2e
