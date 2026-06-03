@@ -29,12 +29,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
-    "@cloudflare/vitest-pool-workers": "^0.16.7",
+    "@cloudflare/vitest-pool-workers": "^0.16.12",
     "@types/node": "^25.9.1",
     "esbuild": "^0.28.0",
-    "license-checker-rseidelsohn": "^4.4.2",
+    "license-checker-rseidelsohn": "^5.0.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6",
+    "vitest": "^4.1.8",
     "wrangler": "^4.93.0"
   }
 }
