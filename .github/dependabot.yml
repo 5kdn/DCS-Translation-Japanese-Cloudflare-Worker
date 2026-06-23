@@ -21,7 +21,6 @@ updates:
     - "ci"
   commit-message:
     prefix: "chore(ci)"
-    include: "scope"
 
 # ─────────────────────────────────────────────────────────
 # 2) Node.js (pnpm-lock.yaml) の依存を監視
