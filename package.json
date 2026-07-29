@@ -28,12 +28,12 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.0",
+    "@biomejs/biome": "^2.5.6",
     "@cloudflare/vitest-pool-workers": "^0.19.0",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.1.2",
     "esbuild": "^0.28.1",
     "license-checker-rseidelsohn": "^5.0.1",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10",
     "wrangler": "^4.103.0"
   }
