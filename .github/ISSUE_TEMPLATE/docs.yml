@@ -16,14 +16,13 @@ body:
     id: doc_type
     attributes:
       label: 対象ドキュメント種別
-      description: 該当するものを選択してください（複数可）
-      multiple: true
+      description: 該当するものを選択してください
       options:
-        - label: README / プロジェクト概要
-        - label: OpenAPI / Swagger UI
-        - label: CONTRIBUTING / 開発ガイド
-        - label: CI/CD / 運用手順
-        - label: そのほか（備考に詳細を記載）
+        - README / プロジェクト概要
+        - OpenAPI / Swagger UI
+        - CONTRIBUTING / 開発ガイド
+        - CI/CD / 運用手順
+        - その他
     validations:
       required: true
 

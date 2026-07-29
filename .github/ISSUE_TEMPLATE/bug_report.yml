@@ -27,15 +27,14 @@ body:
     id: surface
     attributes:
       label: 影響領域
-      description: 不具合が発生した機能を選択してください（複数可）
-      multiple: true
+      description: 不具合が発生した機能を選択してください
       options:
-        - label: Cloudflare Worker API 本番
-        - label: Cloudflare Worker Dev / wrangler dev
-        - label: OpenAPI / Swagger UI
-        - label: GitHub 連携処理（Octokit）
-        - label: ZIP 生成機能
-        - label: その他（備考に詳細を記載）
+        - Cloudflare Worker API 本番
+        - Cloudflare Worker Dev / wrangler dev
+        - OpenAPI / Swagger UI
+        - GitHub 連携処理（Octokit）
+        - ZIP 生成機能
+        - その他
 
   - type: textarea
     id: steps

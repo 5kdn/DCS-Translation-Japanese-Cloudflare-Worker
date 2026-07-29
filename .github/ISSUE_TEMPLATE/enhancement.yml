@@ -16,15 +16,14 @@ body:
     id: surface
     attributes:
       label: 対象領域
-      description: 改善したいコンポーネントを選択してください（複数可）
-      multiple: true
+      description: 改善したいコンポーネントを選択してください
       options:
-        - label: Cloudflare Worker ルーティング / ミドルウェア
-        - label: GitHub API 連携（Octokit）
-        - label: ZIP 生成 / 圧縮処理
-        - label: OpenAPI / Swagger UI
-        - label: CI / CD / Release Please
-        - label: その他（補足に記載）
+        - Cloudflare Worker ルーティング / ミドルウェア
+        - GitHub API 連携（Octokit）
+        - ZIP 生成 / 圧縮処理
+        - OpenAPI / Swagger UI
+        - CI / CD / Release Please
+        - その他
     validations:
       required: true
 
