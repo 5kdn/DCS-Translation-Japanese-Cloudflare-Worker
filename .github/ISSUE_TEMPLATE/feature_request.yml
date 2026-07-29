@@ -28,14 +28,13 @@ body:
     id: audience
     attributes:
       label: 主な利用者
-      description: 想定ユーザーを選択してください（複数可）
-      multiple: true
+      description: 想定ユーザーを選択してください
       options:
-        - label: 翻訳メンテナ
-        - label: 自動化 Bot / CI
-        - label: 外部利用者（公開 API）
-        - label: コア開発者
-        - label: その他（補足に記載）
+        - 翻訳メンテナ
+        - 自動化 Bot / CI
+        - 外部利用者（公開 API）
+        - コア開発者
+        - その他
     validations:
       required: true
 

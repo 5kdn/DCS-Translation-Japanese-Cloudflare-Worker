@@ -1,5 +1,5 @@
 name: ❓ 質問
-description: API の使い方や挙動に関する質問を記録するテンプレート（チャット的な質問は Discord 推奨）
+description: API の使い方や挙動に関する質問を記録するテンプレート
 title: "[Question]: "
 labels: [question]
 body:
@@ -16,14 +16,13 @@ body:
     id: topic
     attributes:
       label: トピック
-      description: 対象領域を選択してください（複数可）
-      multiple: true
+      description: 対象領域を選択してください
       options:
-        - label: Cloudflare Worker / wrangler
-        - label: GitHub API 連携
-        - label: OpenAPI / Swagger
-        - label: CI / Release / 自動化
-        - label: その他
+        - Cloudflare Worker / wrangler
+        - GitHub API 連携
+        - OpenAPI / Swagger
+        - CI / Release / 自動化
+        - その他
     validations:
       required: true
 
