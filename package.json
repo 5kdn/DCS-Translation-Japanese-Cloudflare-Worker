@@ -22,7 +22,7 @@
     "@hono/zod-openapi": "^1.5.1",
     "@octokit/types": "^16.0.0",
     "fflate": "^0.8.3",
-    "hono": "^4.12.32",
+    "hono": "^4.12.34",
     "jose": "^6.2.4",
     "octokit": "^5.0.5",
     "zod": "^4.4.3"
