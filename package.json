@@ -20,7 +20,7 @@
   "dependencies": {
     "@hono/swagger-ui": "^0.6.1",
     "@hono/zod-openapi": "^1.5.1",
-    "@octokit/types": "^16.0.0",
+    "@octokit/types": "^17.0.0",
     "fflate": "^0.8.3",
     "hono": "^4.12.32",
     "jose": "^6.2.4",
