@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
-    "@cloudflare/vitest-pool-workers": "^0.19.0",
+    "@cloudflare/vitest-pool-workers": "^0.21.3",
     "@types/node": "^26.1.2",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "license-checker-rseidelsohn": "^5.0.1",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10",
