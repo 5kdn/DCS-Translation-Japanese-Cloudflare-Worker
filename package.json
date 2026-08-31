@@ -19,13 +19,13 @@
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.6.1",
-    "@hono/zod-openapi": "^1.5.1",
+    "@hono/zod-openapi": "^1.6.1",
     "@octokit/types": "^16.0.0",
     "fflate": "^0.8.3",
-    "hono": "^4.12.32",
+    "hono": "^4.13.5",
     "jose": "^6.2.4",
     "octokit": "^5.0.5",
-    "zod": "^4.4.3"
+    "zod": "^4.5.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
