@@ -30,7 +30,7 @@ body:
       description: 不具合が発生した機能を選択してください
       options:
         - Cloudflare Worker API 本番
-        - Cloudflare Worker Dev / wrangler dev
+        - Cloudflare Worker Dev / cf dev
         - OpenAPI / Swagger UI
         - GitHub 連携処理（Octokit）
         - ZIP 生成機能
@@ -90,7 +90,7 @@ body:
         - OS: Windows 11 / WSL2 Ubuntu 22.04
         - Node.js: v20.11.1
         - pnpm: 9.12.0
-        - wrangler: 4.0.0
+        - cf: 1.0.0-beta.20
         - Cloudflare Worker bindings: NODE_ENV=development, AllowOrigins=http://localhost:8787
         - 対象リポジトリ: TARGET_GH_OWNER=5kdn / TARGET_GH_REPO=DCS-Translation-Japanese
     validations:
@@ -100,7 +100,7 @@ body:
     id: logs
     attributes:
       label: ログ / スタックトレース
-      description: wrangler のターミナルログや Cloudflare ダッシュボードのエラーを貼り付けてください（機微情報は伏字にする）
+      description: cf のターミナルログや Cloudflare ダッシュボードのエラーを貼り付けてください（機微情報は伏字にする）
       placeholder: "例: [2025-11-05T12:34:56Z] ERROR Octokit request failed..."
     validations:
       required: false

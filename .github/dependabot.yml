@@ -44,9 +44,9 @@ updates:
       prefix-development: "chore"
       include: "scope"
     groups:
-      wrangler-and-workers:
+      cloudflare-and-workers:
         patterns:
-          - "wrangler"
+          - "cf"
           - "@cloudflare/*"
       hono-and-openapi:
         patterns:

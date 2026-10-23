@@ -1,5 +1,5 @@
 import { SELF } from 'cloudflare:test';
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('Worker e2e', () => {
   it('GET /health で稼働状態を返す', async () => {

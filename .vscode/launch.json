@@ -2,15 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Wrangler Dev (start)",
+      "name": "Cloudflare Dev (start)",
       "type": "node-terminal",
       "request": "launch",
-      "command": "pnpm wrangler dev --inspect",
+      "command": "pnpm dev",
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.dev.vars"
     },
     {
-      "name": "Wrangler Dev (attach)",
+      "name": "Cloudflare Dev (attach)",
       "type": "pwa-node",
       "request": "attach",
       "address": "127.0.0.1",
@@ -44,10 +44,10 @@
   ],
   "compounds": [
     {
-      "name": "Wrangler Dev + Attach",
+      "name": "Cloudflare Dev + Attach",
       "configurations": [
-        "Wrangler Dev (start)",
-        "Wrangler Dev (attach)"
+        "Cloudflare Dev (start)",
+        "Cloudflare Dev (attach)"
       ]
     }
   ]

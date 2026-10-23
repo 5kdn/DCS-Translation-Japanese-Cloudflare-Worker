@@ -26,25 +26,25 @@ const ensureUserPathSafeMock = vi.mocked(ensureUserPathSafe);
 
 type RestMocks = {
   repos: {
-    getBranch: ReturnType<typeof vi.fn>;
-    getContent: ReturnType<typeof vi.fn>;
+    getBranch: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    getContent: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
   };
   git: {
-    getRef: ReturnType<typeof vi.fn>;
-    getCommit: ReturnType<typeof vi.fn>;
-    createRef: ReturnType<typeof vi.fn>;
-    createTree: ReturnType<typeof vi.fn>;
-    createCommit: ReturnType<typeof vi.fn>;
-    updateRef: ReturnType<typeof vi.fn>;
-    getTree: ReturnType<typeof vi.fn>;
-    getBlob: ReturnType<typeof vi.fn>;
+    getRef: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    getCommit: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    createRef: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    createTree: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    createCommit: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    updateRef: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    getTree: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    getBlob: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
   };
   pulls: {
-    create: ReturnType<typeof vi.fn>;
-    list: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
+    list: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
   };
   issues: {
-    create: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn<(...args: unknown[]) => Promise<unknown>>>;
   };
 };
 
@@ -94,7 +94,7 @@ describe('getFilteredTreeItems', () => {
 
     rest.repos.getBranch.mockResolvedValue({
       data: { commit: { sha: 'commit-sha' } },
-    } as unknown as Awaited<ReturnType<typeof rest.repos.getBranch>>);
+    });
 
     rest.git.getTree.mockResolvedValue({
       data: {
@@ -111,7 +111,7 @@ describe('getFilteredTreeItems', () => {
           { type: 'blob', path: '.git/config', sha: 'sha-g2', size: 1, url: 'u-g2' },
         ],
       },
-    } as unknown as Awaited<ReturnType<typeof rest.git.getTree>>);
+    });
 
     const items = await getFilteredTreeItems(ctxOf(octokit));
 
@@ -163,7 +163,7 @@ describe('fetchRepositoryFile', () => {
         sha: 'sha-file',
         content: 'YQ==\n',
       },
-    } as unknown as Awaited<ReturnType<typeof rest.repos.getContent>>);
+    });
 
     const result = await fetchRepositoryFile(ctxOf(octokit), 'DCSWorld/Mods/file.txt');
 
@@ -197,7 +197,7 @@ describe('fetchRepositoryFile', () => {
         sha: 'sha-size',
         content: 'YWI=',
       },
-    } as unknown as Awaited<ReturnType<typeof rest.repos.getContent>>);
+    });
 
     const result = await fetchRepositoryFile(ctxOf(octokit), 'DCSWorld/Mods/size.txt');
 
@@ -221,8 +221,8 @@ describe('fetchRepositoryFile', () => {
     ensureUserPathSafeMock.mockImplementation(() => {});
 
     rest.repos.getContent.mockResolvedValue({
-      data: [] as unknown as Awaited<ReturnType<typeof rest.repos.getContent>>['data'],
-    } as Awaited<ReturnType<typeof rest.repos.getContent>>);
+      data: [],
+    });
 
     await expect(fetchRepositoryFile(ctxOf(octokit), 'DCSWorld/Mods')).rejects.toMatchObject({
       code: 'DIRECTORY_NOT_ALLOWED',
@@ -242,7 +242,7 @@ describe('fetchRepositoryFile', () => {
         sha: 'sha-link',
         content: 'YQ==',
       },
-    } as unknown as Awaited<ReturnType<typeof rest.repos.getContent>>);
+    });
 
     await expect(fetchRepositoryFile(ctxOf(octokit), 'DCSWorld/Mods/link')).rejects.toMatchObject({
       code: 'UNSUPPORTED_CONTENT',
@@ -279,20 +279,12 @@ describe('createPullRequest', () => {
   });
 
   const baseStubs = (rest: RestMocks) => {
-    rest.git.getRef.mockResolvedValue({ data: { object: { sha: 'base-commit-sha' } } } as Partial<
-      ReturnType<typeof rest.git.getRef>
-    >);
-    rest.git.getCommit.mockResolvedValue({ data: { tree: { sha: 'base-tree-sha' } } } as unknown as Awaited<
-      ReturnType<typeof rest.git.getCommit>
-    >);
-    rest.git.createRef.mockResolvedValue({} as unknown as Awaited<ReturnType<typeof rest.git.createRef>>);
-    rest.git.createTree.mockResolvedValue({ data: { sha: 'new-tree-sha' } } as unknown as Awaited<
-      ReturnType<typeof rest.git.createTree>
-    >);
-    rest.git.createCommit.mockResolvedValue({ data: { sha: 'new-commit-sha' } } as unknown as Awaited<
-      ReturnType<typeof rest.git.createCommit>
-    >);
-    rest.git.updateRef.mockResolvedValue({} as unknown as Awaited<ReturnType<typeof rest.git.updateRef>>);
+    rest.git.getRef.mockResolvedValue({ data: { object: { sha: 'base-commit-sha' } } });
+    rest.git.getCommit.mockResolvedValue({ data: { tree: { sha: 'base-tree-sha' } } });
+    rest.git.createRef.mockResolvedValue({});
+    rest.git.createTree.mockResolvedValue({ data: { sha: 'new-tree-sha' } });
+    rest.git.createCommit.mockResolvedValue({ data: { sha: 'new-commit-sha' } });
+    rest.git.updateRef.mockResolvedValue({});
   };
 
   it('正常系: 新規PRを作成して結果を返す', async () => {
@@ -300,7 +292,7 @@ describe('createPullRequest', () => {
     baseStubs(rest);
     rest.pulls.create.mockResolvedValue({
       data: { number: 123, html_url: 'https://example/pr/123' },
-    } as unknown as Awaited<ReturnType<typeof rest.pulls.create>>);
+    });
 
     const payload: PullRequestPayload = {
       prTitle: 'feat: add files',
@@ -358,7 +350,7 @@ describe('createPullRequest', () => {
     rest.pulls.create.mockRejectedValue({ status: 422 });
     rest.pulls.list.mockResolvedValue({
       data: [{ number: 9, html_url: 'https://example/pr/9' }],
-    } as unknown as Awaited<ReturnType<typeof rest.pulls.list>>);
+    });
 
     const payload: PullRequestPayload = {
       prTitle: 'fix: patch',
@@ -441,7 +433,7 @@ describe('createIssue', () => {
     const { octokit, rest } = makeOctokit();
     rest.issues.create.mockResolvedValue({
       data: { number: 7, html_url: 'https://example/issues/7' },
-    } as unknown as Awaited<ReturnType<typeof rest.issues.create>>);
+    });
 
     const payload: IssuePayload = {
       title: '  bug report  ',

@@ -30,9 +30,9 @@
 
 "Wrangler Config":
   - changed-files:
-      - any-glob-to-any-file: "worker-configuration.d.ts"
-      - any-glob-to-any-file: "wrangler.toml"
-      - any-glob-to-any-file: ".wrangler/**"
+      - any-glob-to-any-file: ".cloudflare/types/index.d.ts"
+      - any-glob-to-any-file: "cloudflare.config.ts"
+      - any-glob-to-any-file: "vite.config.mts"
       - any-glob-to-any-file: ".dev.vars"
 
 "Dependencies":

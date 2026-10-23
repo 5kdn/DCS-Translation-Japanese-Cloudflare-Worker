@@ -3,8 +3,8 @@ import { INTERNAL_ERROR_MESSAGE } from '@/helpers/httpErrorMessageHelper';
 import app from '@/index';
 import { getFilteredTreeItems } from '@/services/githubService';
 import { TreePathUpdatedAtService } from '@/services/treePathUpdatedAtService';
-import type { ApiResponseBase, TreeItem } from '@/types/api';
 import type { AppEnv } from '@/types/env';
+import type { TreeItem } from '@/types/types';
 
 vi.mock('@/services/githubService', () => ({
   getFilteredTreeItems: vi.fn(),
@@ -53,6 +53,7 @@ describe('GET /tree', () => {
         sha: 'abc123',
         size: 1024,
         url: 'https://example.com/blob1',
+        updatedAt: null,
       },
       {
         path: 'DCSWorld/Mods/tech/CombinedArms/entry.lua',
@@ -61,6 +62,7 @@ describe('GET /tree', () => {
         sha: 'def456',
         size: 2048,
         url: 'https://example.com/blob2',
+        updatedAt: null,
       },
     ];
     mockedGetFilteredTreeItems.mockResolvedValueOnce(treeItems);
@@ -102,7 +104,7 @@ describe('GET /tree', () => {
 
     const response = await app.fetch(new Request('http://localhost/tree', { method: 'GET' }), env);
     expect(response.status).toBe(500);
-    const body = await response.json<ApiResponseBase<null>>();
+    const body = await response.json<{ success: false; message: string }>();
     expect(body.success).toBe(false);
     expect(body.message).toBe(INTERNAL_ERROR_MESSAGE);
     expect(mockedGetFilteredTreeItems).toHaveBeenCalledTimes(1);

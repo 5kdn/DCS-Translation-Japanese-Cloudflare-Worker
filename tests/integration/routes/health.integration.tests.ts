@@ -1,15 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import app from '@/index';
-import type { AppEnv } from '@/types/env';
-
-const createEnv = (): AppEnv['Bindings'] => ({
-  NODE_ENV: 'development',
-  AllowOrigins: undefined,
-});
+import { createTestBindings } from '../../helpers/environment';
 
 describe('GET /health', () => {
   it('稼働状態を返す', async () => {
-    const env = createEnv();
+    const env = createTestBindings({ AllowOrigins: undefined });
     const response = await app.fetch(new Request('http://localhost/health', { method: 'GET' }), env);
 
     expect(response.status).toBe(200);

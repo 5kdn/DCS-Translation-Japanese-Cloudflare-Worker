@@ -6,7 +6,7 @@
   ],
   "settings": {
     "files.associations": {
-      "wrangler.json": "jsonc"
+      "cloudflare.config.ts": "typescript"
     }
   }
 }
