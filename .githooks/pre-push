@@ -160,8 +160,8 @@ has_commit_update() {
 
 # CI 相当の品質ゲートを並列実行する。
 run_repository_gates() {
-  run_parallel_step 'Biome check' corepack pnpm check
-  run_parallel_step 'Test suite' corepack pnpm test
+  run_parallel_step 'Biome check' pnpm check
+  run_parallel_step 'Test suite' pnpm test
   wait_parallel_steps
 }
 
@@ -185,7 +185,7 @@ main() {
     exit 0
   fi
 
-  require_command corepack
+  require_command pnpm
   run_repository_gates
 }
 
