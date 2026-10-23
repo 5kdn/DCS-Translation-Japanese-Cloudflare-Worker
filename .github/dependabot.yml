@@ -64,14 +64,9 @@ updates:
           - "vitest"
           - "esbuild"
           - "license-checker*"
-          - "@cloudflare/vitest-pool-workers"
+          - "@cloudflare/vitest-plugin"
       types-and-biome:
         patterns:
           - "typescript"
           - "@types/*"
           - "@biomejs/*"
-    ignore:
-      # vitest は 4.x系ではなく3系を使用する必要がある(@cloudflare/vitest-pool-workers)
-      - dependency-name: "vitest"
-        update-types:
-          - "version-update:semver-major"
