@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.4](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.3...v1.5.4) (2026-10-23)
+
+
+### Bug Fixes
+
+* **deps:** bump jose from 6.2.3 to 6.2.4 ([#108](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/108)) ([9f6424a](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/9f6424adde52fb65f4ca39378ddd70c360e3666c))
+* **deps:** bump the hono-and-openapi group across 1 directory with 2 updates ([#105](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/105)) ([96caf0e](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/96caf0e7695132f77e78d52474b617c4bc20279c))
+* **hooks:** run pnpm directly without Corepack ([#135](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/135)) ([2482d60](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/commit/2482d600ce3846330ea1addf6b9fbfdfcdb3de7b)), closes [#134](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/issues/134)
+
 ## [1.5.3](https://github.com/5kdn/DCS-Translation-Japanese-Cloudflare-Worker/compare/v1.5.2...v1.5.3) (2026-05-20)
 
 
