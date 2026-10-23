@@ -34,7 +34,7 @@ body:
       description: 発生している課題・指標・ユーザーからの声などを記載してください
       placeholder: |
         例:
-        - `/tree` が 5MB を超えるレスポンスを返し wrangler dev がタイムアウトする
+        - `/tree` が 5MB を超えるレスポンスを返し cf dev がタイムアウトする
         - Zip 生成時のメモリ消費が大きい
     validations:
       required: true
@@ -53,7 +53,7 @@ body:
     attributes:
       label: 完了条件 / メトリクス
       description: 改善が完了したと判断できる条件や SLA を記載してください
-      placeholder: "例: `/tree` が 1s 未満で応答 / wrangler dev で GC が発生しない"
+      placeholder: "例: `/tree` が 1s 未満で応答 / cf dev で GC が発生しない"
     validations:
       required: false
 

@@ -1,13 +1,16 @@
 import { ReadableStream as NodeReadableStream } from 'node:stream/web';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, assert, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { ZipStreamEntry } from '@/services/zipStreamService';
-
-(globalThis as { ReadableStream: typeof NodeReadableStream }).ReadableStream = NodeReadableStream;
 
 let buildZip64Stream!: typeof import('@/services/zipStreamService')['buildZip64Stream'];
 
 beforeAll(async () => {
+  vi.stubGlobal('ReadableStream', NodeReadableStream);
   ({ buildZip64Stream } = await import('@/services/zipStreamService'));
+});
+
+afterAll(() => {
+  vi.unstubAllGlobals();
 });
 
 const textEncoder = new TextEncoder();
@@ -97,14 +100,18 @@ describe('buildZip64Stream', () => {
 
     let cursor = 0;
     sources.forEach((source, index) => {
+      const expectedTimestamp = expectedDos[index];
+      const entry = entries[index];
+      assert(expectedTimestamp);
+      assert(entry);
       localOffsets.push(BigInt(cursor));
       expect(view.getUint32(cursor, true)).toBe(LOCAL_FILE_HEADER_SIGNATURE);
       expect(view.getUint16(cursor + 4, true)).toBe(ZIP_VERSION);
       expect(view.getUint16(cursor + 6, true)).toBe(0);
       expect(view.getUint16(cursor + 8, true)).toBe(0);
-      expect(view.getUint16(cursor + 10, true)).toBe(expectedDos[index].dosTime);
-      expect(view.getUint16(cursor + 12, true)).toBe(expectedDos[index].dosDate);
-      expect(view.getUint32(cursor + 14, true)).toBe(entries[index].crc32);
+      expect(view.getUint16(cursor + 10, true)).toBe(expectedTimestamp.dosTime);
+      expect(view.getUint16(cursor + 12, true)).toBe(expectedTimestamp.dosDate);
+      expect(view.getUint32(cursor + 14, true)).toBe(entry.crc32);
       expect(view.getUint32(cursor + 18, true)).toBe(0xffffffff);
       expect(view.getUint32(cursor + 22, true)).toBe(0xffffffff);
       const fileNameLength = view.getUint16(cursor + 26, true);
@@ -124,14 +131,18 @@ describe('buildZip64Stream', () => {
 
     const centralDirectoryOffset = cursor;
     sources.forEach((source, index) => {
+      const expectedTimestamp = expectedDos[index];
+      const entry = entries[index];
+      assert(expectedTimestamp);
+      assert(entry);
       expect(view.getUint32(cursor, true)).toBe(CENTRAL_FILE_HEADER_SIGNATURE);
       expect(view.getUint16(cursor + 4, true)).toBe(ZIP_VERSION);
       expect(view.getUint16(cursor + 6, true)).toBe(ZIP_VERSION);
       expect(view.getUint16(cursor + 8, true)).toBe(0);
       expect(view.getUint16(cursor + 10, true)).toBe(0);
-      expect(view.getUint16(cursor + 12, true)).toBe(expectedDos[index].dosTime);
-      expect(view.getUint16(cursor + 14, true)).toBe(expectedDos[index].dosDate);
-      expect(view.getUint32(cursor + 16, true)).toBe(entries[index].crc32);
+      expect(view.getUint16(cursor + 12, true)).toBe(expectedTimestamp.dosTime);
+      expect(view.getUint16(cursor + 14, true)).toBe(expectedTimestamp.dosDate);
+      expect(view.getUint32(cursor + 16, true)).toBe(entry.crc32);
       expect(view.getUint32(cursor + 20, true)).toBe(0xffffffff);
       expect(view.getUint32(cursor + 24, true)).toBe(0xffffffff);
       const fileNameLength = view.getUint16(cursor + 28, true);

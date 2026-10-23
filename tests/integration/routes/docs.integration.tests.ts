@@ -1,15 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import app from '@/index';
-import type { AppEnv } from '@/types/env';
-
-const createEnv = (): AppEnv['Bindings'] => ({
-  NODE_ENV: 'development',
-  AllowOrigins: '',
-});
+import { createTestBindings } from '../../helpers/environment';
 
 describe('GET /docs', () => {
   it('Swagger UI のHTMLを返す', async () => {
-    const env = createEnv();
+    const env = createTestBindings();
     const response = await app.fetch(new Request('http://localhost/docs', { method: 'GET' }), env);
 
     expect(response.status).toBe(200);

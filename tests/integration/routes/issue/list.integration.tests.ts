@@ -16,7 +16,6 @@ const createEnv = (): AppEnv['Bindings'] => ({
   TARGET_GH_REPO: 'test-repo',
   TARGET_GH_DEFAULT_BRANCH: 'main',
   DOWNLOAD_FILES_RATE_LIMIT: '30',
-  TARGET_GH_SECRET: 'dummy',
   TARGET_GH_APP_ID: '123456',
   TARGET_GH_APP_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\nxxxxxxxxxxxxxxxxxxxxxxxxx\n-----END PRIVATE KEY-----',
   TARGET_GH_INSTALLATION_ID: '987654321',

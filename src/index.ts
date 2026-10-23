@@ -11,7 +11,7 @@ import { scheduled } from './handlers/scheduled';
 import { treeRoutes } from './routes/tree';
 import { treeMetadataRoutes } from './routes/tree-metadata';
 
-const packageJson = await import('../package.json', { assert: { type: 'json' } });
+const packageJson = await import('../package.json', { with: { type: 'json' } });
 
 const app = new OpenAPIHono<AppEnv>();
 

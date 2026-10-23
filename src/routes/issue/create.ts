@@ -157,7 +157,7 @@ const createIssueHandler = async (
     TARGET_GH_OWNER,
     TARGET_GH_REPO,
     TARGET_GH_DEFAULT_BRANCH,
-  } = env as Record<string, string | undefined>;
+  } = env;
   const appId = getRequiredEnvNumber('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
   const privateKey = getRequiredEnvString('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
   const installationId = getRequiredEnvNumber('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);

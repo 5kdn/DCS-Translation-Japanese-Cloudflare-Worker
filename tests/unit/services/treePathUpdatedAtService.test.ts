@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type TreePathUpdatedAtItem, TreePathUpdatedAtService } from '@/services/treePathUpdatedAtService';
 
+type TreePathUpdatedAtRow = { path: string; updated_at: number | null };
+
 type Statement = {
   bind: ReturnType<typeof vi.fn>;
   run: ReturnType<typeof vi.fn>;
@@ -9,7 +11,7 @@ type Statement = {
 
 const makeStatement = (options?: {
   runImpl?: () => Promise<unknown>;
-  allImpl?: () => Promise<{ results?: TreePathUpdatedAtItem[] }>;
+  allImpl?: () => Promise<{ results?: TreePathUpdatedAtRow[] }>;
 }) => {
   const statement: Statement = {
     bind: vi.fn(),
@@ -23,7 +25,7 @@ const makeStatement = (options?: {
 };
 
 const makeDb = (options?: {
-  selectResults?: TreePathUpdatedAtItem[];
+  selectResults?: TreePathUpdatedAtRow[];
   insertRunImpl?: () => Promise<unknown>;
   batchImpl?: (statements: D1PreparedStatement[]) => Promise<unknown>;
   insertStatementFactory?: () => Statement;

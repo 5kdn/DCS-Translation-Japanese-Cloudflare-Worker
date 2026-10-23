@@ -18,7 +18,7 @@ body:
       label: トピック
       description: 対象領域を選択してください
       options:
-        - Cloudflare Worker / wrangler
+        - Cloudflare Worker / cf
         - GitHub API 連携
         - OpenAPI / Swagger
         - CI / Release / 自動化
@@ -33,7 +33,7 @@ body:
       description: どのような状況で疑問が生じたか、使用中のバージョンなどを書いてください
       placeholder: |
         例:
-        - README のデプロイ手順を実施中に wrangler エラーが出た
+        - README のデプロイ手順を実施中に cf エラーが出た
         - Cloudflare KV のバインディングを追加したい
     validations:
       required: true

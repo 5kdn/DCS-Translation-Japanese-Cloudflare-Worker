@@ -44,7 +44,8 @@
     "types": [
       "node",
       "vitest",
-      "./worker-configuration.d.ts"
+      "@cloudflare/vitest-plugin/types",
+      "./.cloudflare/types/index.d.ts"
     ],
     "paths": {
       "@/*": [
@@ -53,7 +54,9 @@
     }
   },
   "include": [
-    "worker-configuration.d.ts",
+    ".cloudflare/types/index.d.ts",
+    "cloudflare.config.ts",
+    "vite.config.mts",
     "src/**/*.ts",
     "tests/**/*.ts"
   ]

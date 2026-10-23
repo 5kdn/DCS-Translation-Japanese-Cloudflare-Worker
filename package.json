@@ -4,17 +4,18 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev --script src/index.dev.ts",
+    "deploy": "cf deploy",
+    "dev": "cf dev --mode development",
     "lint": "biome lint .",
     "fmt": "biome format . --write",
     "check": "biome check .",
-    "start": "wrangler dev",
+    "typecheck": "tsc --noEmit && tsc -p tests/tsconfig.json --noEmit",
+    "start": "cf dev --mode production",
     "test": "vitest --run",
     "test:unit": "vitest --project unit --run",
     "test:integration": "vitest --project integration --run",
     "test:e2e": "vitest --project e2e --run",
-    "cf-typegen": "wrangler types",
+    "cf-typegen": "cf workers types",
     "generate-licenses": "node -e \"const fs=require('node:fs'); fs.rmSync('THIRD-PARTY-NOTICES/files',{ recursive:true, force:true }); fs.mkdirSync('THIRD-PARTY-NOTICES/files',{ recursive:true });\" && license-checker-rseidelsohn --markdown --production --excludePrivatePackages --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md --files THIRD-PARTY-NOTICES/files"
   },
   "dependencies": {
@@ -29,12 +30,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.2",
+    "@cloudflare/vite-plugin": "2.0.0-beta.v.4",
     "@cloudflare/vitest-plugin": "1.4.7",
     "@types/node": "^26.6.5",
+    "cf": "1.0.0-beta.20",
     "esbuild": "^0.28.2",
     "license-checker-rseidelsohn": "^5.0.1",
     "typescript": "^7.0.2",
-    "vitest": "5.0.5",
-    "wrangler": "^4.152.0"
+    "vite": "^8.3.5",
+    "vitest": "5.0.5"
   }
 }

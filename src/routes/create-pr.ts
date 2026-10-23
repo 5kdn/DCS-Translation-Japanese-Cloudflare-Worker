@@ -170,7 +170,7 @@ const createPr = async (
     TARGET_GH_OWNER,
     TARGET_GH_REPO,
     TARGET_GH_DEFAULT_BRANCH,
-  } = env as Record<string, string | undefined>;
+  } = env;
   assertEnv('TARGET_GH_APP_ID', TARGET_GH_APP_ID);
   assertEnv('TARGET_GH_APP_PRIVATE_KEY', TARGET_GH_APP_PRIVATE_KEY);
   assertEnv('TARGET_GH_INSTALLATION_ID', TARGET_GH_INSTALLATION_ID);
