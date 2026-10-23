@@ -177,17 +177,17 @@ run_secret_detection() {
 
 # Biome で commit 対象の staged ファイルを検証する。
 run_biome_gate() {
-  require_command corepack
+  require_command pnpm
   printf '\033[36m==> Biome staged check\033[0m\n'
 
-  if corepack pnpm exec biome check --staged --no-errors-on-unmatched; then
+  if pnpm exec biome check --staged --no-errors-on-unmatched; then
     printf '\033[32m==> success Biome staged check\033[0m\n'
     return 0
   fi
 
   printf '\033[1;31mERROR: Biomeによるstagedファイルの検査に失敗しました。\033[0m\n' >&2
-  printf 'corepack pnpm check を実行して内容を確認してください。\n' >&2
-  printf '自動修正する場合は corepack pnpm check --write を実行し、修正をstageし直してください。\n' >&2
+  printf 'pnpm check を実行して内容を確認してください。\n' >&2
+  printf '自動修正する場合は pnpm check --write を実行し、修正をstageし直してください。\n' >&2
   exit 1
 }
 
