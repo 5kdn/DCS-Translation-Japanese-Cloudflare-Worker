@@ -16,12 +16,12 @@
 
 ## 実行と開発手順
 
-- 依存関係の導入: `pnpm install`
+- 初回セットアップ: `pnpm install --frozen-lockfile` → `pnpm generate`
 - ローカル開発サーバー: `pnpm dev`
 - 本番エントリポイントでのローカル起動: `pnpm start`
 - デプロイ前のビルド・設定確認: `pnpm run deploy --dry-run`
 - 本番デプロイ: GitHub Actions（Release 公開時、または手動実行）
-- 型定義生成: `pnpm cf-typegen`
+- 開発・ビルド用生成物の再生成: `pnpm generate`
 - 静的検証: `pnpm check`, `pnpm typecheck`, `pnpm lint`, `pnpm fmt`
 - テスト実行: `pnpm test`
 
@@ -36,8 +36,21 @@ cf と Cloudflare Vite プラグインは beta 版のため、動作確認済み
 ローカルのシークレットは `.dev.vars` に設定してください（Git 管理対象外）。
 ローカル D1 の既存データは自動移行されないため、必要に応じて初期化・移行してください。
 
-`pnpm cf-typegen` は `.cloudflare/types/index.d.ts` を生成します。
-設定変更時は再生成し、この型定義もコミットしてください。
+`pnpm generate` は開発・ビルド用生成処理の共通入口です。
+現在は `pnpm cf-typegen` を呼び出し、`.cloudflare/types/index.d.ts` を生成します。
+設定や依存関係を変更した場合、エディターで型定義が見つからない場合は再実行してください。
+今後の生成処理も `generate` スクリプトに追加します。
+
+`pnpm dev`、`pnpm start`、`pnpm typecheck`、`pnpm test`、`pnpm test:unit`、
+`pnpm test:integration`、`pnpm test:e2e`、`pnpm run deploy` は、実行前に必ず
+`pnpm generate` を実行します。生成に失敗した場合は後続処理を実行しません。
+CI の独立した各ジョブとデプロイも同じスクリプトを使うため、生成物がない環境から実行できます。
+ビルドの検証には `pnpm run deploy --dry-run` を使用します。
+
+`.cloudflare/` 以下の生成物は Git 管理せず、コミットも差分チェックも不要です。
+再生成に必要な設定・入力・`pnpm-lock.yaml` は引き続き Git 管理します。
+`THIRD-PARTY-NOTICES` はこの方針の対象外で、従来どおり `pnpm generate-licenses` で生成し、
+Git 管理と既存 CI による検証を維持します。
 
 ローカルから本番へデプロイする場合は、`CLOUDFLARE_ACCOUNT_ID` と
 `CLOUDFLARE_API_TOKEN` を設定して `pnpm run deploy` を実行します。

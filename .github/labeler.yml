@@ -30,7 +30,6 @@
 
 "Wrangler Config":
   - changed-files:
-      - any-glob-to-any-file: ".cloudflare/types/index.d.ts"
       - any-glob-to-any-file: "cloudflare.config.ts"
       - any-glob-to-any-file: "vite.config.mts"
       - any-glob-to-any-file: ".dev.vars"
