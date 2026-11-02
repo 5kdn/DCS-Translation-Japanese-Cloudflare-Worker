@@ -165,7 +165,4 @@ dist
 .env*
 !.env.example
 .wrangler/
-.cloudflare/*
-!.cloudflare/types/
-.cloudflare/types/*
-!.cloudflare/types/index.d.ts
+.cloudflare/
