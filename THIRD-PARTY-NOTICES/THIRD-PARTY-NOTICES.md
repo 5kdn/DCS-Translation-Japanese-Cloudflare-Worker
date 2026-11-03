@@ -1,5 +1,5 @@
 - [@asteasolutions/zod-to-openapi@9.1.0](https://github.com/asteasolutions/zod-to-openapi) - MIT
-- [@hono/swagger-ui@0.6.1](https://github.com/honojs/middleware) - MIT
+- [@hono/swagger-ui@0.6.2](https://github.com/honojs/middleware) - MIT
 - [@hono/zod-openapi@1.6.3](https://github.com/honojs/middleware) - MIT
 - [@hono/zod-validator@0.9.1](https://github.com/honojs/middleware) - MIT
 - [@octokit/app@16.1.4](https://github.com/octokit/app.js) - MIT
