@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hono/swagger-ui':
-        specifier: ^0.6.1
-        version: 0.6.1(hono@4.13.14)
+        specifier: ^0.6.2
+        version: 0.6.2(hono@4.13.14)
       '@hono/zod-openapi':
         specifier: ^1.6.3
         version: 1.6.3(hono@4.13.14)(zod@4.6.7)
@@ -370,8 +370,8 @@ packages:
     resolution: {integrity: sha512-GmzA9ckNokPypTg10pgpeHNQe7ph+iIKKmhKu3Ob9ANkswreCx7R3cKmY781K8QK3AqVL3xVh9A42JvIAbkkSA==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
-  '@hono/swagger-ui@0.6.1':
-    resolution: {integrity: sha512-sJTvldu1GPeEPfyeLG7gRj+W4vEuD+JDi+JjJ3TJs/DvMUtBLs0KJO5yokGegWWdy5qrbdnQGekbhgNRmPmYKQ==}
+  '@hono/swagger-ui@0.6.2':
+    resolution: {integrity: sha512-EDLlBS+LwpAhhh5K45YH85Yyk9GJuD2E7rKdjTZsBObksXaBz+8jPsen5XZqOS9unw6H1CDq0LKzp0c51K6lsA==}
     peerDependencies:
       hono: '>=4.0.0'
 
@@ -2063,7 +2063,7 @@ snapshots:
 
   '@gar/promise-retry@1.0.3': {}
 
-  '@hono/swagger-ui@0.6.1(hono@4.13.14)':
+  '@hono/swagger-ui@0.6.2(hono@4.13.14)':
     dependencies:
       hono: 4.13.14
 
