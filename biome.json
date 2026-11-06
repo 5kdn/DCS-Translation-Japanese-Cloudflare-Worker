@@ -46,11 +46,11 @@
     "includes": [
       "**",
       "!**/*.md",
-      "!.wrangler",
       "!**/dist",
       "!**/node_modules",
-      "!pnpm-lock.yaml",
-      "!.cloudflare"
+      "!.cloudflare",
+      "!.wrangler",
+      "!pnpm-lock.yaml"
     ]
   }
 }

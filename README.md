@@ -51,7 +51,7 @@ cf と Cloudflare Vite プラグインは beta 版のため、動作確認済み
 `pnpm generate` は開発・ビルド用生成処理の共通入口です。
 現在は `pnpm cf-typegen` を呼び出し、`.cloudflare/types/index.d.ts` を生成します。
 設定や依存関係を変更した場合、エディターで型定義が見つからない場合は再実行してください。
-今後の生成処理も `generate` スクリプトに追加します。
+v2 API は v1 と同じ `@hono/zod-openapi` を使用します。`src/api/v2/routes/` 配下の各操作ファイルと共有スキーマを編集し、`pnpm test:contract` で確認してください。入力検証と型は Zod 定義を共有し、公開する OpenAPI は Hono が実行時に組み立てます。コードの自動生成スクリプト・生成ファイルはありません。
 
 `pnpm dev`、`pnpm start`、`pnpm typecheck`、`pnpm test`、`pnpm test:unit`、`pnpm test:integration`、`pnpm test:e2e`、`pnpm run deploy` は、実行前に必ず `pnpm generate` を実行します。生成に失敗した場合は後続処理を実行しません。
 CI の独立した各ジョブとデプロイも同じスクリプトを使うため、生成物がない環境から実行できます。

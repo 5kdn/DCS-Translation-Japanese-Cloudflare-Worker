@@ -48,9 +48,6 @@ importers:
       cf:
         specifier: 1.0.0-beta.26
         version: 1.0.0-beta.26(@types/node@26.6.6)
-      esbuild:
-        specifier: ^0.28.2
-        version: 0.28.2
       license-checker-rseidelsohn:
         specifier: ^5.0.1
         version: 5.0.1

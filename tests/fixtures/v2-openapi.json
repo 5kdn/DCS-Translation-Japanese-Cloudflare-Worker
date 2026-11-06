@@ -1,0 +1,1573 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DCS日本語翻訳API v2",
+    "version": "2.0.0",
+    "description": "DCS日本語翻訳のIssue・PR・ファイル情報・更新日時を扱うAPI。"
+  },
+  "servers": [
+    {
+      "url": "https://api.dcs-translation-japanese.workers.dev"
+    }
+  ],
+  "paths": {
+    "/v2/issues": {
+      "get": {
+        "operationId": "listIssues",
+        "tags": [
+          "issues"
+        ],
+        "summary": "Issue一覧を取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Issue一覧。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "Issueの一覧を取得する。",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/State"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createIssue",
+        "tags": [
+          "issues"
+        ],
+        "summary": "Issueを作成する",
+        "security": [],
+        "responses": {
+          "201": {
+            "description": "作成したIssue。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "新しいIssueの作成。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/issues/{number}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Number"
+        }
+      ],
+      "get": {
+        "operationId": "getIssue",
+        "tags": [
+          "issues"
+        ],
+        "summary": "Issue詳細を取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Issueの詳細。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateIssue",
+        "tags": [
+          "issues"
+        ],
+        "summary": "Issueのタイトル・本文を編集する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "編集後のIssue。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "Issueのタイトルと本文の編集。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/prs": {
+      "get": {
+        "operationId": "listPullRequests",
+        "tags": [
+          "prs"
+        ],
+        "summary": "PR一覧を取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "PR一覧。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequestPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "作成日時の降順で取得するPR一覧。",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/State"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createPullRequest",
+        "tags": [
+          "prs"
+        ],
+        "summary": "ファイル差分からPRを作成・再利用する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "作成・再利用したPR。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequestCreation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "ファイル差分によるPRの作成、または既存PRの再利用。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PullRequestCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/prs/{number}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/Number"
+        }
+      ],
+      "get": {
+        "operationId": "getPullRequest",
+        "tags": [
+          "prs"
+        ],
+        "summary": "PR詳細を取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "PRの詳細。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        }
+      }
+    },
+    "/v2/tree": {
+      "get": {
+        "operationId": "getTree",
+        "tags": [
+          "tree"
+        ],
+        "summary": "ツリー全件を取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "ツリーの全件スナップショット。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TreeSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "422": {
+            "$ref": "#/components/responses/SnapshotLimit"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "同一コミットのファイル一覧と更新日時を含む全件スナップショット。"
+      }
+    },
+    "/v2/files": {
+      "get": {
+        "operationId": "getFiles",
+        "tags": [
+          "files"
+        ],
+        "summary": "ファイル情報とダウンロードURLを取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "ファイル情報とダウンロードURL。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Files"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "指定したファイルの情報と、コミットに固定されたダウンロードURL。",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096,
+                "description": "DCSWorld/またはUserMissions/配下の相対パス（UTF-8で4096バイト以内）。"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "uniqueItems": true
+            }
+          }
+        ]
+      }
+    },
+    "/v2/tree-metadata": {
+      "patch": {
+        "operationId": "upsertTreeMetadata",
+        "tags": [
+          "tree-metadata"
+        ],
+        "summary": "ファイルの更新日時を一括登録・更新する",
+        "security": [
+          {
+            "githubActionsOidc": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新した件数。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "422": {
+            "$ref": "#/components/responses/Unprocessable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "GitHub ActionsのOIDC認証による、ファイル更新日時の一括登録・更新。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/openapi.json": {
+      "get": {
+        "operationId": "getOpenApi",
+        "summary": "OpenAPI仕様を取得する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "公開するSSOTのOpenAPI仕様。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "openapi",
+                    "info",
+                    "paths"
+                  ],
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        }
+      }
+    },
+    "/v2/docs": {
+      "get": {
+        "operationId": "getDocs",
+        "summary": "APIドキュメントを表示する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Swagger UI。",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        }
+      }
+    },
+    "/v2/health": {
+      "get": {
+        "operationId": "getHealth",
+        "tags": [
+          "health"
+        ],
+        "summary": "Workerの稼働状態を確認する",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Workerの稼働状態。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/Internal"
+          },
+          "502": {
+            "$ref": "#/components/responses/Upstream"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "default": {
+            "$ref": "#/components/responses/Other"
+          }
+        },
+        "description": "APIの稼働状態を確認する。"
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "githubActionsOidc": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "GitHub ActionsのOIDC IDトークン（audience: tree-metadata）。"
+      }
+    },
+    "parameters": {
+      "Number": {
+        "name": "number",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "description": "IssueまたはPRの番号。"
+      },
+      "State": {
+        "name": "state",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed",
+            "all"
+          ],
+          "default": "open"
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        },
+        "description": "1ページの取得件数。"
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "description": "次ページの取得位置を表すカーソル（有効期間24時間）。"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "リクエストの形式または入力値が不正。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "認証トークンが未指定または無効。",
+        "headers": {
+          "WWW-Authenticate": {
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Bearer認証の要求（realm=\"tree-metadata\"、error=\"invalid_token\"）。"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "必要な権限を満たさないトークン。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "対象のリソースが存在しない。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "NotAcceptable": {
+        "description": "Acceptで指定されたメディアタイプに対応していない。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "更新の競合、またはOIDCトークンの再利用。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "リクエスト本文が上限の5 MiBを超過。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "UnsupportedMediaType": {
+        "description": "リクエスト本文のContent-Typeに対応していない。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Unprocessable": {
+        "description": "リクエストが業務条件を満たさない。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "SnapshotLimit": {
+        "description": "ツリーが100,000件または応答サイズ20 MiBの上限を超過。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "送信元IPごとの書き込み上限（10回/300秒）に到達。",
+        "headers": {
+          "Retry-After": {
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 300
+            },
+            "description": "再試行までの待機時間（秒）。"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Internal": {
+        "description": "予期しない内部エラー。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Upstream": {
+        "description": "GitHubとの通信または応答データのエラー。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Unavailable": {
+        "description": "依存先の利用不可、またはGitHub側の回数制限。",
+        "headers": {
+          "Retry-After": {
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "再試行を待つ秒数（整数）。"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Other": {
+        "description": "共通形式のエラー応答。",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance",
+          "code"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "detail": {
+            "type": "string",
+            "description": "エラーの詳細。"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri-reference",
+            "description": "エラーが発生したリクエストのパス。"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "INVALID_REQUEST",
+              "INVALID_CURSOR",
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "METHOD_NOT_ALLOWED",
+              "NOT_ACCEPTABLE",
+              "CONFLICT",
+              "REPLAY_DETECTED",
+              "PAYLOAD_TOO_LARGE",
+              "URI_TOO_LONG",
+              "UNSUPPORTED_MEDIA_TYPE",
+              "UNPROCESSABLE_CONTENT",
+              "SNAPSHOT_LIMIT_EXCEEDED",
+              "RATE_LIMITED",
+              "INTERNAL_ERROR",
+              "UPSTREAM_ERROR",
+              "SERVICE_UNAVAILABLE"
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "description": "RFC 9457形式のエラー情報。"
+      },
+      "Issue": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "number",
+          "title",
+          "body",
+          "state",
+          "url",
+          "createdAt",
+          "updatedAt",
+          "closedAt"
+        ]
+      },
+      "IssueCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "空白以外の文字を含むタイトル。"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 65536
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "maxItems": 20,
+            "uniqueItems": true
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 39
+            },
+            "maxItems": 10,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "IssueUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "空白以外の文字を含むタイトル。"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 65536
+          }
+        },
+        "required": [],
+        "minProperties": 1,
+        "description": "タイトル・本文の変更内容。省略したフィールドは変更しない。"
+      },
+      "PullRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "merged": {
+            "type": "boolean"
+          },
+          "mergedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "headBranch": {
+            "type": "string"
+          },
+          "baseBranch": {
+            "type": "string"
+          },
+          "headSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+          }
+        },
+        "required": [
+          "number",
+          "title",
+          "body",
+          "state",
+          "url",
+          "createdAt",
+          "updatedAt",
+          "closedAt",
+          "draft",
+          "merged",
+          "mergedAt",
+          "headBranch",
+          "baseBranch",
+          "headSha"
+        ]
+      },
+      "FileUpsert": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "DCSWorld/またはUserMissions/配下の相対パス（UTF-8で4096バイト以内）。"
+          },
+          "operation": {
+            "type": "string",
+            "const": "upsert",
+            "default": "upsert"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 1048576,
+            "description": "ファイルの内容（UTF-8で1 MiB以内、空文字列可）。"
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ]
+      },
+      "FileDelete": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "DCSWorld/またはUserMissions/配下の相対パス（UTF-8で4096バイト以内）。"
+          },
+          "operation": {
+            "type": "string",
+            "const": "delete"
+          }
+        },
+        "required": [
+          "path",
+          "operation"
+        ]
+      },
+      "PullRequestCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "prTitle": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "空白以外の文字を含むタイトル。"
+          },
+          "prBody": {
+            "type": "string",
+            "maxLength": 65536
+          },
+          "branchName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "変更先のブランチ名（デフォルトブランチ・保護ブランチは指定不可）。"
+          },
+          "commitMessage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 65536,
+            "description": "コミットメッセージ（省略時はprTitle）。"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FileUpsert"
+                },
+                {
+                  "$ref": "#/components/schemas/FileDelete"
+                }
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "追加・更新・削除するファイルの配列。"
+          }
+        },
+        "required": [
+          "prTitle",
+          "branchName",
+          "files"
+        ]
+      },
+      "PullRequestCreation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "commitSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+          },
+          "reused": {
+            "type": "boolean",
+            "description": "既存PRを再利用したかどうか。"
+          }
+        },
+        "required": [
+          "number",
+          "url",
+          "branchName",
+          "commitSha",
+          "reused"
+        ]
+      },
+      "Page": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048,
+            "description": "次ページのカーソル。最終ページはnull。"
+          }
+        },
+        "required": [
+          "nextCursor"
+        ]
+      },
+      "IssuePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "maxItems": 100
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ]
+      },
+      "PullRequestPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PullRequest"
+            },
+            "maxItems": 100
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
+          }
+        },
+        "required": [
+          "items",
+          "page"
+        ]
+      },
+      "TreeItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "DCSWorld/またはUserMissions/配下の相対パス（UTF-8で4096バイト以内）。"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "100644",
+              "100755",
+              "120000"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "const": "blob"
+          },
+          "sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "path",
+          "mode",
+          "type",
+          "sha",
+          "size",
+          "url",
+          "updatedAt"
+        ]
+      },
+      "TreeSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "commitSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TreeItem"
+            },
+            "maxItems": 100000
+          }
+        },
+        "required": [
+          "commitSha",
+          "generatedAt",
+          "items"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "DCSWorld/またはUserMissions/配下の相対パス（UTF-8で4096バイト以内）。"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "path",
+          "url",
+          "sha",
+          "size",
+          "updatedAt"
+        ]
+      },
+      "Files": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "commitSha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "commitSha",
+          "generatedAt",
+          "files"
+        ]
+      },
+      "MetadataEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "DCSWorld/またはUserMissions/配下の相対パス（UTF-8で4096バイト以内）。"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ファイルの更新日時（現在から過去1時間以内）。"
+          }
+        },
+        "required": [
+          "path",
+          "updatedAt"
+        ]
+      },
+      "MetadataUpdate": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/MetadataEntry"
+        },
+        "minItems": 1,
+        "maxItems": 1000,
+        "description": "パスと更新日時の一括登録・更新データ。"
+      },
+      "MetadataResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "updatedCount": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "updatedCount"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "status",
+          "timestamp"
+        ]
+      }
+    }
+  }
+}

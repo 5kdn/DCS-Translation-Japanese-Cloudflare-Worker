@@ -1,4 +1,4 @@
-// src/routes/health.ts
+/** 旧APIのヘルスチェックを提供し、既存の応答形式を維持する。 */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import type { AppEnv } from '@/types/env';
 
