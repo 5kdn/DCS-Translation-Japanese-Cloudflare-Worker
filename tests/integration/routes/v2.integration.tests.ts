@@ -80,6 +80,7 @@ describe('v2 public contracts', () => {
         for (const [status, headers] of [
           ['401', specification.components.responses.Unauthorized.headers],
           ['429', specification.components.responses.RateLimited.headers],
+          ['503', specification.components.responses.Unavailable.headers],
         ] as const) {
           if (status in operation.responses) {
             expect(document).toHaveProperty(['paths', path, method, 'responses', status, 'headers'], headers);
@@ -207,7 +208,7 @@ describe('shared v2 operation pipeline', () => {
     await expectV2Contract(response, 'createIssue');
   });
 
-  it.each([401, 403, 429, 500] as const)('normalizes thrown and returned failures: %s', async (status) => {
+  it.each([401, 403, 429, 500, 503] as const)('normalizes thrown and returned failures: %s', async (status) => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       for (const thrown of [false, true]) {
@@ -225,7 +226,7 @@ describe('shared v2 operation pipeline', () => {
         const body = await expectV2Contract(response);
         expect(JSON.stringify(body)).not.toContain('private');
         if (status === 401) expect(response.headers.get('WWW-Authenticate')).toContain('Bearer');
-        if (status === 429) expect(response.headers.get('Retry-After')).toBe('30');
+        if (status === 429 || status === 503) expect(response.headers.get('Retry-After')).toBe('30');
       }
     } finally {
       log.mockRestore();
