@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [cloudflareTest({ experimental: { newConfig: true } })],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(import.meta.dirname, 'src'),
     },
   },
   test: {
