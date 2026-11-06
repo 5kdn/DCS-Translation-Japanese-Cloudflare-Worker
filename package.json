@@ -17,6 +17,9 @@
     "test:integration": "pnpm generate && vitest --project integration --run",
     "test:e2e": "pnpm generate && vitest --project e2e --run",
     "generate": "pnpm cf-typegen",
+    "generate:openapi": "node scripts/generate-openapi.mjs",
+    "check:openapi": "node scripts/generate-openapi.mjs --check",
+    "test:contract": "pnpm generate && vitest --project integration --run tests/integration/routes/v2.integration.tests.ts",
     "cf-typegen": "cf workers types",
     "generate-licenses": "node -e \"const fs=require('node:fs'); fs.rmSync('THIRD-PARTY-NOTICES/files',{ recursive:true, force:true }); fs.mkdirSync('THIRD-PARTY-NOTICES/files',{ recursive:true });\" && license-checker-rseidelsohn --markdown --production --excludePrivatePackages --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md --files THIRD-PARTY-NOTICES/files"
   },
@@ -35,9 +38,12 @@
     "@cloudflare/vite-plugin": "2.0.0-beta.v.8",
     "@cloudflare/vitest-plugin": "1.4.11",
     "@types/node": "^26.6.6",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "cf": "1.0.0-beta.26",
     "esbuild": "^0.28.2",
     "license-checker-rseidelsohn": "^5.0.1",
+    "openapi-typescript": "^6.7.6",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "5.0.5"

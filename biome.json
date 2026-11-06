@@ -50,7 +50,8 @@
       "!**/dist",
       "!**/node_modules",
       "!pnpm-lock.yaml",
-      "!.cloudflare"
+      "!.cloudflare",
+      "!src/v2/generated"
     ]
   }
 }

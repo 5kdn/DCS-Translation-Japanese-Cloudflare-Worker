@@ -7,6 +7,7 @@ import downloadFilesRoute from '@/routes/download-files';
 import healthRoute from '@/routes/health';
 import { issueRoutes } from '@/routes/issue';
 import type { AppEnv } from '@/types/env';
+import v2 from '@/v2';
 import { scheduled } from './handlers/scheduled';
 import { treeRoutes } from './routes/tree';
 import { treeMetadataRoutes } from './routes/tree-metadata';
@@ -95,6 +96,8 @@ app.use(
 );
 
 // mount routes
+/** v2の入力検証・エラー形式は専用アプリ内に閉じ、旧APIへ適用しない。 */
+app.route('/v2', v2);
 app.route('/', createPrRoute);
 app.route('/', docsRoute);
 app.route('/', downloadFilesRoute);

@@ -1,7 +1,16 @@
+/**
+ * 旧download-file-pathsのURL生成・キャッシュ・既存400応答を回帰検証する。
+ * v2のエラーコードや入力検証を旧APIへ波及させないことを確認する。
+ * @packageDocumentation
+ */
 import { describe, expect, it } from 'vitest';
 import app from '@/index';
 import type { AppEnv } from '@/types/env';
 
+/**
+ * 外部通信を必要としない旧APIのテスト用バインディングを作成する。
+ * @returns ダミーのGitHub設定と既存のダウンロード制限を含む環境。
+ */
 const createEnv = (): AppEnv['Bindings'] => ({
   NODE_ENV: 'development',
   AllowOrigins: undefined,
@@ -15,6 +24,22 @@ const createEnv = (): AppEnv['Bindings'] => ({
 });
 
 describe('POST /download-file-paths', () => {
+  it('必須項目欠落時の既存の400応答を維持する', async () => {
+    const response = await app.fetch(
+      new Request('http://localhost/download-file-paths', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      }),
+      createEnv(),
+    );
+    expect(response.status).toBe(400);
+    expect(response.headers.get('Content-Type')).toBe('application/json');
+    const body = await response.json();
+    expect(body).toMatchObject({ success: false, error: { name: 'ZodError' } });
+    expect(body).not.toHaveProperty('code');
+  });
+
   it('正常にURL一覧を返却する', async () => {
     const env = createEnv();
     const response = await app.fetch(
@@ -105,7 +130,16 @@ describe('POST /download-file-paths', () => {
     );
 
     expect(response.status).toBe(400);
+    expect(response.headers.get('Content-Type')).toBe('application/problem+json');
     const body = (await response.json()) as { errors: Record<string, string[]> };
+    expect(body).toMatchObject({
+      type: 'https://dcs-translation-japanese.workers.dev/problem/validation',
+      title: 'Bad Request',
+      status: 400,
+      detail: '入力の検証に失敗しました。',
+      instance: '/download-file-paths',
+    });
+    expect(body).not.toHaveProperty('code');
     expect(body.errors?.['paths[0]']?.[0]).toMatch('先頭にスラッシュ');
   });
 });

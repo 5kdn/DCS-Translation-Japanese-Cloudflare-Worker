@@ -19,6 +19,9 @@ on:
     paths:
       - "src/**/*"
       - "tests/**/*"
+      - "scripts/**/*"
+      - "biome.json"
+      - "pnpm-workspace.yaml"
       - "package.json"
       - "pnpm-lock.yaml"
       - "vitest.config.*"
@@ -48,6 +51,7 @@ jobs:
 
       - run: pnpm i --frozen-lockfile
       - run: pnpm biome check .
+      - run: pnpm check:openapi
       - run: pnpm typecheck
       - run: pnpm run deploy --dry-run
 
@@ -83,6 +87,7 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm i --frozen-lockfile
+      # Includes v2 OAS response contracts and legacy path/auth/rate-limit/URL regression tests.
       - run: pnpm test:integration
 
   E2ETest:
