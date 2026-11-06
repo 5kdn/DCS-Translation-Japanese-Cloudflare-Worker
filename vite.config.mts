@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import { defineConfig } from 'vite';
-import { apiWorker } from './cloudflare.config';
+import { apiWorker } from './cloudflare.config.ts';
 
 export default defineConfig({
   plugins: [cloudflare({ auxiliaryWorkers: [{ config: apiWorker }] })],
