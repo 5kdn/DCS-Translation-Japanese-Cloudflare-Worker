@@ -1,4 +1,18 @@
-import { bindings, defineConfig, triggers } from 'cf/config';
+import { bindings, defineConfig, defineWorker, triggers } from 'cf/config';
+
+/**
+ * 新URLで受信し、Service Binding経由で既存のAPI本体へ転送するWorkerの設定。
+ * Viteの補助Workerとしてビルドし、API本体とは別にデプロイする。
+ */
+export const apiWorker = defineWorker({
+  name: 'api',
+  compatibilityDate: '2026-05-25',
+  entrypoint: 'src/apiProxy.ts',
+  observability: { enabled: true },
+  env: {
+    API: bindings.worker({ worker: 'dcs-translation-japanese-cloudflare-worker' }),
+  },
+});
 
 export default defineConfig(({ mode }) => ({
   worker: {
