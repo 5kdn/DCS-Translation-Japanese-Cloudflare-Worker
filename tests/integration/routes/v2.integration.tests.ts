@@ -76,6 +76,7 @@ describe('v2 public contracts', () => {
             },
           },
         });
+        expect(document).not.toHaveProperty(['paths', path, method, 'middleware']);
       }
     }
     expect(document).toMatchObject({ components: { securitySchemes: specification.components.securitySchemes } });

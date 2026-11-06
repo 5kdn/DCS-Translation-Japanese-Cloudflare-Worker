@@ -30,7 +30,8 @@ registerDocsRoutes(app);
 
 for (const route of Object.values(routes)) {
   if (route === routes.getHealth || route === routes.getOpenApi || route === routes.getDocs) continue;
-  app.openAPIRegistry.registerPath(route);
+  const { middleware: _middleware, ...definition } = route;
+  app.openAPIRegistry.registerPath(definition);
 }
 app.openAPIRegistry.registerComponent('securitySchemes', 'githubActionsOidc', {
   type: 'http',
