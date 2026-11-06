@@ -1,15 +1,13 @@
+/**
+ * 開発用のOpenAPI・CORS設定で旧APIを提供するWorkerエントリーポイント。
+ * 公開パスと定期処理は既存の開発環境の動作を維持する。
+ * @packageDocumentation
+ */
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
-import createPrRoute from '@/routes/create-pr';
-import docsRoute from '@/routes/docs';
-import downloadFilePathsRoute from '@/routes/download-file-paths';
-import downloadFilesRoute from '@/routes/download-files';
-import healthRoute from '@/routes/health';
-import { issueRoutes } from '@/routes/issue';
+import v1 from '@/api/v1';
 import type { AppEnv } from '@/types/env';
 import { scheduled } from './handlers/scheduled';
-import { treeRoutes } from './routes/tree';
-import { treeMetadataRoutes } from './routes/tree-metadata';
 
 const packageJson = await import('../package.json', { with: { type: 'json' } });
 
@@ -49,15 +47,8 @@ app.use(
   }),
 );
 
-// mount routes
-app.route('/', createPrRoute);
-app.route('/', docsRoute);
-app.route('/', downloadFilesRoute);
-app.route('/', downloadFilePathsRoute);
-app.route('/issue', issueRoutes);
-app.route('/tree', treeRoutes);
-app.route('/tree-metadata', treeMetadataRoutes);
-app.route('/', healthRoute);
+/** 本番用と同じ旧APIルートを、既存の開発用設定の下へ登録する。 */
+app.route('/', v1);
 
 export default {
   fetch: app.fetch,

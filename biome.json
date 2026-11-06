@@ -51,7 +51,7 @@
       "!**/node_modules",
       "!pnpm-lock.yaml",
       "!.cloudflare",
-      "!src/v2/generated"
+      "!src/api/v2/generated"
     ]
   }
 }

@@ -6,9 +6,9 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { describe, expect, it, vi } from 'vitest';
+import { createV2App, registerOperation } from '@/api/v2/app';
+import specification from '@/api/v2/openapi.json';
 import worker from '@/index';
-import { createV2App, registerOperation } from '@/v2/app';
-import specification from '@/v2/openapi.json';
 import { createTestBindings } from '../../helpers/environment';
 import { expectV2Contract } from '../../helpers/v2Contract';
 

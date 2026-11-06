@@ -1,6 +1,6 @@
 import { expect } from 'vitest';
-import { operations } from '@/v2/generated/operations';
-import { responses } from '@/v2/generated/validators.js';
+import { operations } from '@/api/v2/generated/operations';
+import { responses } from '@/api/v2/generated/validators.js';
 
 /** 契約を照合するOASの操作識別子。 */
 type OperationId = keyof typeof operations;

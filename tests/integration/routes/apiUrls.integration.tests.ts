@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import proxy from '@/apiProxy';
 import app from '@/index';
+import developmentApp from '@/index.dev';
 import { createIssue, getIssues } from '@/services/githubService';
 import { createTestBindings } from '../../helpers/environment';
 
@@ -17,6 +18,30 @@ const bindings = createTestBindings({ AllowOrigins: origin });
  * GitHubとの通信だけをモックし、新旧URLで同じルーターの動作を検証する。
  */
 const api = { fetch: async (input: RequestInfo | URL, init?: RequestInit) => app.fetch(new Request(input, init), bindings) };
+
+/** 開発用エントリーポイントでも旧APIのスキーマ・ルート・CORS設定を維持する。 */
+describe('開発用エントリーポイント', () => {
+  it('OpenAPIがローカルURLと旧APIの操作を案内する', async () => {
+    const response = await developmentApp.fetch(new Request('http://localhost/openapi.json'), bindings);
+    expect(response.status).toBe(200);
+    const document = await response.json<{ servers: Array<{ url: string }>; paths: Record<string, unknown> }>();
+    expect(document.servers[0]?.url).toBe('http://127.0.0.1:8787');
+    expect(document.paths).toHaveProperty('/health');
+    expect(document.paths).toHaveProperty('/download-file-paths');
+    expect(document.paths).not.toHaveProperty('/v2/health');
+  });
+
+  it('healthが既存のCORS設定で応答する', async () => {
+    const response = await developmentApp.fetch(
+      new Request('http://localhost/health', { headers: { Origin: origin } }),
+      bindings,
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin);
+    expect(response.headers.has('Access-Control-Expose-Headers')).toBe(false);
+    expect(await response.json()).toMatchObject({ status: 'ok' });
+  });
+});
 
 describe.each([
   ['新URL', 'https://api.dcs-translation-japanese.workers.dev', (request: Request) => proxy.fetch(request, { API: api })],
@@ -56,6 +81,13 @@ describe.each([
       if (legacy) expect(operation).toHaveProperty('deprecated', true);
       else expect(operation).not.toHaveProperty('deprecated', true);
     }
+  });
+
+  it('OpenAPIのGETは既存どおりCORS処理より先に応答する', async () => {
+    const response = await fetch(new Request(`${baseUrl}/openapi.json`, { headers: { Origin: origin } }));
+    expect(response.status).toBe(200);
+    expect(response.headers.has('Access-Control-Allow-Origin')).toBe(false);
+    expect(response.headers.get('Deprecation')).toBe(legacy ? '@1793923200' : null);
   });
 
   it('Swagger UIでも同じOpenAPIを使用し、非推奨ヘッダーを返す', async () => {
