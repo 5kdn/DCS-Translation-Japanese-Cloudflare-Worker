@@ -1,9 +1,10 @@
 import path from 'node:path';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import { defineConfig } from 'vite';
+import { apiWorker } from './cloudflare.config';
 
 export default defineConfig({
-  plugins: [cloudflare()],
+  plugins: [cloudflare({ auxiliaryWorkers: [{ config: apiWorker }] })],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, 'src'),
