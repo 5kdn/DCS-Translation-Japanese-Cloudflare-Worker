@@ -69,7 +69,24 @@ export const listQuerySchema = z.strictObject({
 export const failure = { description: 'Problem Details', content: { 'application/problem+json': { schema: problemSchema } } };
 export const readFailures = { 400: failure, 406: failure, 500: failure, 502: failure, 503: failure, default: failure };
 
-export const writeFailures = { ...readFailures, 409: failure, 413: failure, 415: failure, 422: failure, 429: failure };
+export const writeFailures = {
+  ...readFailures,
+  409: failure,
+  413: failure,
+  415: failure,
+  422: failure,
+  429: {
+    ...failure,
+    headers: z.object({
+      'Retry-After': z
+        .number()
+        .int()
+        .min(1)
+        .max(300)
+        .openapi({ param: { description: '再試行までの待機時間（秒）。' } }),
+    }),
+  },
+};
 export const jsonMiddleware: [MiddlewareHandler<AppEnv>] = [acceptResponse('application/json')];
 export const bodyMiddleware: [MiddlewareHandler<AppEnv>, MiddlewareHandler<AppEnv>] = [
   acceptResponse('application/json'),

@@ -77,6 +77,14 @@ describe('v2 public contracts', () => {
           },
         });
         expect(document).not.toHaveProperty(['paths', path, method, 'middleware']);
+        for (const [status, headers] of [
+          ['401', specification.components.responses.Unauthorized.headers],
+          ['429', specification.components.responses.RateLimited.headers],
+        ] as const) {
+          if (status in operation.responses) {
+            expect(document).toHaveProperty(['paths', path, method, 'responses', status, 'headers'], headers);
+          }
+        }
       }
     }
     expect(document).toMatchObject({ components: { securitySchemes: specification.components.securitySchemes } });

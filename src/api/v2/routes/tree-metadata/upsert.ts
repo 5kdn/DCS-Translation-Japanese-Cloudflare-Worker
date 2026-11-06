@@ -26,7 +26,14 @@ export const upsertTreeMetadata = createRoute({
   responses: {
     200: { description: '更新した件数。', content: { 'application/json': { schema: metadataResultSchema } } },
     ...writeFailures,
-    401: failure,
+    401: {
+      ...failure,
+      headers: z.object({
+        'WWW-Authenticate': z
+          .string()
+          .openapi({ param: { description: 'Bearer認証の要求（realm="tree-metadata"、error="invalid_token"）。' } }),
+      }),
+    },
     403: failure,
   },
 });
