@@ -1,14 +1,17 @@
 /**
  * v2の公開応答・入力検証・共通失敗形式と、旧APIからの分離を契約検証する。
- * 後続操作の成功・失敗ケースもOAS由来の検証コードへ照合する。
+ * 後続操作の成功・失敗ケースもHonoのZodスキーマへ照合する。
  * @packageDocumentation
  */
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { describe, expect, it, vi } from 'vitest';
-import { createV2App, registerOperation } from '@/api/v2/app';
-import specification from '@/api/v2/openapi.json';
+import { createV2App } from '@/api/v2/app';
+import { openApiSchema, routes } from '@/api/v2/routes';
+import { issueCreateSchema } from '@/api/v2/routes/issue/create';
 import worker from '@/index';
+import specification from '../../fixtures/v2-openapi.json';
 import { createTestBindings } from '../../helpers/environment';
 import { expectV2Contract } from '../../helpers/v2Contract';
 
@@ -30,8 +33,52 @@ describe('v2 public contracts', () => {
     const response = await request(path);
     expect(response.status).toBe(200);
     const body = await expectV2Contract(response, operation);
-    if (operation === 'getOpenApi') expect(body).toEqual(specification);
+    if (operation === 'getOpenApi') {
+      expect(body).toMatchObject({ openapi: '3.1.0', info: specification.info });
+      expect(Object.keys(openApiSchema.parse(body).paths).sort()).toEqual(Object.keys(specification.paths).sort());
+    }
     if (operation === 'getDocs') expect(body).toContain('/v2/openapi.json');
+  });
+
+  it.each(['/v2/health', '/v2/openapi.json', '/v2/docs'])('HEAD %s returns headers without a body', async (path) => {
+    const response = await request(path, { method: 'HEAD' });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toContain(path.endsWith('/docs') ? 'text/html' : 'application/json');
+    expect(await response.text()).toBe('');
+  });
+
+  it('keeps all documented operations, success statuses, media types and security declarations', async () => {
+    const document: unknown = await (await request('/v2/openapi.json')).json();
+    for (const [path, item] of Object.entries(specification.paths)) {
+      for (const [method, operation] of Object.entries(item)) {
+        if (!operation || typeof operation !== 'object' || !('operationId' in operation)) continue;
+        const responses = Object.fromEntries(
+          Object.entries(operation.responses)
+            .filter(([status]) => status.startsWith('2'))
+            .map(([status, response]) => {
+              const { content } = z.object({ content: z.record(z.string(), z.unknown()) }).parse(response);
+              return [
+                status,
+                {
+                  content: Object.fromEntries(Object.keys(content).map((mediaType) => [mediaType, expect.anything()])),
+                },
+              ];
+            }),
+        );
+        expect(document).toMatchObject({
+          paths: {
+            [path]: {
+              [method]: {
+                operationId: operation.operationId,
+                security: operation.security,
+                responses,
+              },
+            },
+          },
+        });
+      }
+    }
+    expect(document).toMatchObject({ components: { securitySchemes: specification.components.securitySchemes } });
   });
 
   it.each(['/v2', '/v2/', '/v2/missing', '/v2/issues', '/v2/missing?token=secret'])(
@@ -55,6 +102,7 @@ describe('v2 public contracts', () => {
   ] as const)('rejects invalid requests: %s (%s)', async (path, init, status) => {
     const response = await request(path, init);
     expect(response.status).toBe(status);
+    if (status === 405) expect(response.headers.get('Allow')).toBe('GET, HEAD');
     await expectV2Contract(response, 'getHealth');
   });
 
@@ -86,13 +134,25 @@ describe('v2 public contracts', () => {
 });
 
 describe('shared v2 operation pipeline', () => {
+  it('uses the native Hono OpenAPI router', () => {
+    expect(createV2App()).toBeInstanceOf(OpenAPIHono);
+  });
   /**
    * createIssueの入力検証だけを実行するテスト用アプリを作成する。
    * @returns GitHub操作の代わりに検証済み本文を返すアプリ。
    */
   const createApp = (): ReturnType<typeof createV2App> => {
     const app = createV2App();
-    registerOperation(app, 'createIssue', (c) => c.json({ accepted: c.get('v2Input').body }));
+    const route = createRoute({
+      ...routes.createIssue,
+      responses: {
+        200: {
+          description: 'Validated input',
+          content: { 'application/json': { schema: z.object({ accepted: issueCreateSchema }) } },
+        },
+      },
+    });
+    app.openapi(route, (c) => c.json({ accepted: c.req.valid('json') }, 200));
     return app;
   };
 
@@ -101,6 +161,7 @@ describe('shared v2 operation pipeline', () => {
     [{ title: 123, body: 'test' }, 400],
     [{ title: 'test', body: null }, 400],
     [{ title: 'test', body: 'test', unknown: true }, 400],
+    [{ title: 'test', labels: ['duplicate', 'duplicate'] }, 400],
     [null, 400],
   ])('rejects invalid OAS bodies %j', async (body, status) => {
     const response = await createApp().request('/issues', {

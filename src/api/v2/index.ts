@@ -1,23 +1,46 @@
 /**
- * 認証不要のhealth・OpenAPI仕様・Swagger UIをv2専用アプリへ登録する。
- * 未実装のOAS操作は404、実装済みパスの未対応メソッドは405を返す。
+ *  v2の公開ルート。仕様にある未実装の操作は404を返す。
  * @packageDocumentation
  */
-import { swaggerUI } from '@hono/swagger-ui';
-import { createV2App, problem, registerOperation } from './app';
-import type { components } from './generated/types';
-import specification from './openapi.json';
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { createV2App, problem } from './app';
+import { openApiSchema, routes } from './routes';
+import { registerDocsRoutes } from './routes/docs';
+import { registerHealthRoutes } from './routes/health';
 
-/** 親アプリの/v2へマウントする公開エンドポイント群。 */
 const app = createV2App();
-registerOperation(app, 'getHealth', (c) => {
-  const health: components['schemas']['Health'] = { status: 'ok', timestamp: new Date().toISOString() };
-  return c.json(health);
-});
-registerOperation(app, 'getOpenApi', (c) => c.json(specification));
-registerOperation(app, 'getDocs', swaggerUI({ url: '/v2/openapi.json' }));
+registerHealthRoutes(app);
+app.openapi(routes.getOpenApi, (c) =>
+  c.json(
+    openApiSchema.parse(
+      documentation.getOpenAPI31Document({
+        openapi: '3.1.0',
+        info: {
+          title: 'DCS日本語翻訳API v2',
+          version: '2.0.0',
+          description: 'DCS日本語翻訳のIssue・PR・ファイル情報・更新日時を扱うAPI。',
+        },
+        servers: [{ url: 'https://api.dcs-translation-japanese.workers.dev' }],
+      }),
+    ),
+    200,
+  ),
+);
+registerDocsRoutes(app);
 
-// Only implemented operations participate in method dispatch; future OAS paths stay 404.
+for (const route of Object.values(routes)) {
+  if (route === routes.getHealth || route === routes.getOpenApi || route === routes.getDocs) continue;
+  app.openAPIRegistry.registerPath(route);
+}
+app.openAPIRegistry.registerComponent('securitySchemes', 'githubActionsOidc', {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'JWT',
+  description: 'GitHub ActionsのOIDC IDトークン（audience: tree-metadata）。',
+});
+// 親Workerは通常のHonoなので、仕様のパスにも明示的に/v2を付ける。
+const documentation = new OpenAPIHono().route('/v2', app);
+
 for (const path of ['/health', '/openapi.json', '/docs']) {
   app.all(path, (c) => problem(c, 405, { Allow: 'GET, HEAD' }));
 }

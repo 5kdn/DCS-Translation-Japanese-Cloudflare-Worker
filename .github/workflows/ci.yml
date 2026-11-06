@@ -51,7 +51,6 @@ jobs:
 
       - run: pnpm i --frozen-lockfile
       - run: pnpm biome check .
-      - run: pnpm check:openapi
       - run: pnpm typecheck
       - run: pnpm run deploy --dry-run
 
