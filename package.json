@@ -1,6 +1,6 @@
 {
   "name": "dcs-translation-japanese-cloudflare-worker",
-  "version": "1.5.5",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "devEngines": {
