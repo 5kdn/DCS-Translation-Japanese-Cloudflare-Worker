@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest';
-import app from '@/index';
-import { createTestBindings } from '../../helpers/environment';
+import { describe, expect, it, vi } from 'vitest';
+import worker from '@/index';
+import { createTestBindings, env } from '../helpers/v2Write';
+
+vi.mock('octokit', async () => (await import('../helpers/v2WriteMocks')).octokitMock);
+
+const app = worker;
 
 const legacyUrl = 'https://dcs-translation-japanese-cloudflare-worker.dcs-translation-japanese.workers.dev';
 const currentUrl = 'https://api.dcs-translation-japanese.workers.dev';
@@ -41,5 +45,50 @@ describe('旧URLの非推奨表示', () => {
     expect(response.status).toBe(200);
     expect(response.headers.has('Deprecation')).toBe(false);
     expect(response.headers.has('Sunset')).toBe(false);
+  });
+});
+
+describe('openapi.json', () => {
+  it('OpenAPIスキーマをスナップショット検証する', async () => {
+    const env = createTestBindings();
+
+    const response = await app.fetch(new Request('http://localhost/openapi.json', { method: 'GET' }), env);
+    expect(response.status).toBe(200);
+    const doc = await response.json();
+    expect(doc).toMatchSnapshot({
+      info: {
+        version: expect.any(String),
+      },
+    });
+  });
+});
+
+describe('Worker CORS', () => {
+  it('allows PATCH CORS only on v2 and exposes Retry-After', async () => {
+    for (const path of ['/v2/issues/1', '/issue/create']) {
+      const response = await worker.fetch(
+        new Request(`https://example.com${path}`, {
+          method: 'OPTIONS',
+          headers: {
+            Origin: 'https://allowed.example',
+            'Access-Control-Request-Method': 'PATCH',
+          },
+        }),
+        createTestBindings({ AllowOrigins: 'https://allowed.example' }),
+      );
+      expect(response.status).toBe(204);
+      expect(response.headers.get('Access-Control-Allow-Methods')?.includes('PATCH')).toBe(path.startsWith('/v2/'));
+    }
+    const response = await worker.fetch(
+      new Request('https://example.com/v2/issues', {
+        method: 'POST',
+        headers: {
+          Origin: 'https://allowed.example',
+          'CF-Connecting-IP': '192.0.2.1',
+        },
+      }),
+      createTestBindings({ AllowOrigins: 'https://allowed.example', TREE_METADATA_DB: env.TREE_METADATA_DB }),
+    );
+    expect(response.headers.get('Access-Control-Expose-Headers')).toContain('Retry-After');
   });
 });

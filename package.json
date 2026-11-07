@@ -16,7 +16,7 @@
     "test:unit": "node --test scripts/deploy.test.mjs && pnpm generate && vitest --project unit --run",
     "test:integration": "pnpm generate && vitest --project integration --run",
     "test:e2e": "pnpm generate && vitest --project e2e --run",
-    "test:contract": "pnpm generate && vitest --project integration --run tests/integration/routes/v2.integration.tests.ts tests/integration/routes/v2Read.integration.tests.ts tests/integration/routes/v2Write.integration.tests.ts",
+    "test:contract": "pnpm generate && vitest --project integration --run tests/integration/api/v2 tests/integration/services/v2WriteRateLimiterService.integration.tests.ts tests/integration/index.integration.tests.ts",
     "generate": "pnpm cf-typegen",
     "cf-typegen": "cf workers types",
     "generate-licenses": "node -e \"const fs=require('node:fs'); fs.rmSync('THIRD-PARTY-NOTICES/files',{ recursive:true, force:true }); fs.mkdirSync('THIRD-PARTY-NOTICES/files',{ recursive:true });\" && license-checker-rseidelsohn --markdown --production --excludePrivatePackages --out THIRD-PARTY-NOTICES/THIRD-PARTY-NOTICES.md --files THIRD-PARTY-NOTICES/files"
