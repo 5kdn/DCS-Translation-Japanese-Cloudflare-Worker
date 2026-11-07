@@ -1,15 +1,24 @@
 /**
- *  v2の公開ルート。仕様にある未実装の操作は404を返す。
+ * v2の公開ルート・読み取り操作を登録し、全操作のOpenAPI仕様を配信する。
+ * 未実装の書き込み操作は仕様への掲載のみで、実行しない。
  * @packageDocumentation
  */
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { createV2App, problem } from './app';
 import { openApiSchema, routes } from './routes';
 import { registerDocsRoutes } from './routes/docs';
+import { registerFileRoutes } from './routes/files';
 import { registerHealthRoutes } from './routes/health';
+import { registerIssueRoutes } from './routes/issue';
+import { registerPullRequestRoutes } from './routes/pull-request';
+import { registerTreeRoutes } from './routes/tree';
 
 const app = createV2App();
 registerHealthRoutes(app);
+registerIssueRoutes(app);
+registerPullRequestRoutes(app);
+registerTreeRoutes(app);
+registerFileRoutes(app);
 app.openapi(routes.getOpenApi, (c) =>
   c.json(
     openApiSchema.parse(
@@ -29,7 +38,7 @@ app.openapi(routes.getOpenApi, (c) =>
 registerDocsRoutes(app);
 
 for (const route of Object.values(routes)) {
-  if (route === routes.getHealth || route === routes.getOpenApi || route === routes.getDocs) continue;
+  if (route.method === 'get') continue;
   const { middleware: _middleware, ...definition } = route;
   app.openAPIRegistry.registerPath(definition);
 }

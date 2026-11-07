@@ -14,6 +14,20 @@ import type { problemSchema } from './routes/common';
 /** v2の共通エラー本文。 */
 type Problem = z.infer<typeof problemSchema>;
 
+/** OASで定義した操作固有のエラーコードを共通応答へ渡す。 */
+export class ProblemException extends HTTPException {
+  /**
+   * @param status Problem DetailsとHTTP応答に設定するステータス。
+   * @param code ステータスだけでは区別できない操作固有のエラーコード。
+   */
+  constructor(
+    status: ContentfulStatusCode,
+    readonly code: Problem['code'],
+  ) {
+    super(status);
+  }
+}
+
 /** HTTPステータスに対応する公開タイトルとOASのエラーコード。 */
 const failures: Partial<Record<number, readonly [string, Problem['code']]>> = {
   400: ['Bad Request', 'INVALID_REQUEST'],
@@ -39,9 +53,15 @@ const failures: Partial<Record<number, readonly [string, Problem['code']]>> = {
  * @param c エラーが発生したリクエストのコンテキスト。
  * @param status 応答と本文のstatusへ設定するHTTPステータス。
  * @param headers 認証・再試行案内など、維持する応答ヘッダー。
+ * @param errorCode 操作固有のエラーコード。省略時はステータスに対応する共通コード。
  * @returns クエリ文字列や内部例外を含まないapplication/problem+json応答。
  */
-export const problem = (c: Context, status: ContentfulStatusCode, headers?: HeadersInit): Response => {
+export const problem = (
+  c: Context,
+  status: ContentfulStatusCode,
+  headers?: HeadersInit,
+  errorCode?: Problem['code'],
+): Response => {
   const [title, code] = failures[status] ?? ['Internal Server Error', 'INTERNAL_ERROR'];
   const body: Problem = {
     type: 'about:blank',
@@ -49,7 +69,7 @@ export const problem = (c: Context, status: ContentfulStatusCode, headers?: Head
     status,
     detail: title,
     instance: c.req.path,
-    code,
+    code: errorCode ?? code,
   };
   const responseHeaders = new Headers(headers);
   responseHeaders.set('Content-Type', 'application/problem+json');
@@ -66,17 +86,28 @@ export const problem = (c: Context, status: ContentfulStatusCode, headers?: Head
 export const createV2App = (): OpenAPIHono<AppEnv> => {
   const app = new OpenAPIHono<AppEnv>({
     defaultHook: (result, c) => {
-      if (!result.success) return problem(c, 400);
+      if (!result.success) {
+        const invalidCursor = result.target === 'query' && result.error.issues.some((issue) => issue.path[0] === 'cursor');
+        return problem(c, 400, undefined, invalidCursor ? 'INVALID_CURSOR' : undefined);
+      }
     },
   });
   app.onError((error, c) => {
-    if (error instanceof HTTPException) return problem(c, error.status, error.getResponse().headers);
+    if (error instanceof HTTPException) {
+      return problem(c, error.status, error.getResponse().headers, error instanceof ProblemException ? error.code : undefined);
+    }
     console.error('v2 request failed', error);
     return problem(c, 500);
   });
   app.use('*', async (c, next) => {
     const url = new URL(c.req.url);
     if (new TextEncoder().encode(url.pathname + url.search).length > 8192) return problem(c, 414);
+    // 単値クエリの重複はHonoによる先頭値への変換前に拒否する。
+    if (c.req.method === 'GET' || c.req.method === 'HEAD') {
+      for (const key of url.searchParams.keys()) {
+        if (key !== 'path' && url.searchParams.getAll(key).length > 1) return problem(c, 400);
+      }
+    }
     await next();
     // Middleware that returns an auth/rate-limit error must use the same failure format as thrown errors.
     if (c.res.status >= 400 && c.res.headers.get('Content-Type')?.split(';')[0] !== 'application/problem+json') {

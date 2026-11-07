@@ -1,6 +1,7 @@
 /**
  * v2の公開応答・入力検証・共通失敗形式と、旧APIからの分離を契約検証する。
- * 後続操作の成功・失敗ケースもHonoのZodスキーマへ照合する。
+ * 各操作の応答をHonoのZodスキーマへ照合し、未定義パスの404も検証する。
+ * 読み取り6操作の詳細な境界条件はv2Read.integration.tests.tsで検証する。
  * @packageDocumentation
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
@@ -91,14 +92,11 @@ describe('v2 public contracts', () => {
     expect(document).toMatchObject({ components: { securitySchemes: specification.components.securitySchemes } });
   });
 
-  it.each(['/v2', '/v2/', '/v2/missing', '/v2/issues', '/v2/missing?token=secret'])(
-    '%s returns Problem Details',
-    async (path) => {
-      const response = await request(path);
-      expect(response.status).toBe(404);
-      expect(await expectV2Contract(response)).toMatchObject({ code: 'NOT_FOUND', instance: path.split('?')[0] });
-    },
-  );
+  it.each(['/v2', '/v2/', '/v2/missing', '/v2/missing?token=secret'])('%s returns Problem Details', async (path) => {
+    const response = await request(path);
+    expect(response.status).toBe(404);
+    expect(await expectV2Contract(response)).toMatchObject({ code: 'NOT_FOUND', instance: path.split('?')[0] });
+  });
 
   it.each([
     ['/v2/health?extra=1', {}, 400],
