@@ -130,7 +130,7 @@ describe('strict shared sliding write limit', () => {
   it('keeps reads, metadata and legacy requests outside the shared quota', async () => {
     for (let i = 0; i < 11; i++) {
       expect((await request('GET', '/issues')).status).toBe(200);
-      expect((await request('PATCH', '/tree-metadata', [])).status).toBe(404);
+      expect((await request('PATCH', '/tree-metadata', [])).status).toBe(400);
       const legacy = await worker.fetch(
         new Request('https://example.com/issue/create', {
           method: 'POST',
