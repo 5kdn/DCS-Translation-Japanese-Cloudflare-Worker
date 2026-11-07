@@ -418,14 +418,23 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "schema": { "type": "integer", "minimum": 1, "maximum": 10000, "default": 10000 },
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 10000
+            },
             "description": "ページ件数の上限。JSONサイズ上限により、この件数未満でも次ページがある。"
           },
           {
             "name": "cursor",
             "in": "query",
             "required": false,
-            "schema": { "type": "string", "minLength": 1, "maxLength": 2048 },
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
             "description": "前ページのnextCursor。同じlimitで使用する。取得開始から24時間有効。"
           }
         ],
