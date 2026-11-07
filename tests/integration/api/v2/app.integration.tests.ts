@@ -1,7 +1,7 @@
 /**
  * v2の公開応答・入力検証・共通失敗形式と、旧APIからの分離を契約検証する。
  * 各操作の応答をHonoのZodスキーマへ照合し、未定義パスの404も検証する。
- * 読み取り6操作の詳細な境界条件はv2Read.integration.tests.tsで検証する。
+ * 読み取り操作の詳細な境界条件は、各操作のroutes配下の統合テストで検証する。
  * @packageDocumentation
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
@@ -25,6 +25,7 @@ import { expectV2Contract } from '../../../helpers/v2Contract';
 const request = async (path: string, init?: RequestInit): Promise<Response> =>
   worker.fetch(new Request(`https://api.dcs-translation-japanese.workers.dev${path}`, init), createTestBindings());
 
+/** 公開操作・OpenAPI・共通エラー形式が、既存の契約と整合することを確認する。 */
 describe('v2 public contracts', () => {
   it.each([
     ['/v2/health', 'getHealth'],
@@ -41,13 +42,24 @@ describe('v2 public contracts', () => {
     if (operation === 'getDocs') expect(body).toContain('/v2/openapi.json');
   });
 
-  it('documents the full-tree exception, limits and failures in the public OpenAPI', async () => {
+  /** treeの取得完了条件・キャッシュ・件数とサイズ上限が、実際の公開仕様に含まれることを確認する。 */
+  it('documents tree pagination, caching, limits and failures in the public OpenAPI', async () => {
     const document = openApiSchema.parse(await (await request('/v2/openapi.json')).json());
     expect(document).toMatchObject({
       paths: {
         '/v2/tree': {
           get: {
-            description: expect.stringMatching(/ページング.*100,000.*20 MiB.*20,971,520.*422.*SNAPSHOT_LIMIT_EXCEEDED.*502/),
+            description: expect.stringMatching(
+              /10,000.*8 MiB.*nextCursor.*24時間.*60秒.*1年間.*20 MiB.*422.*SNAPSHOT_LIMIT_EXCEEDED.*502/,
+            ),
+            parameters: expect.arrayContaining([
+              expect.objectContaining({
+                name: 'limit',
+                in: 'query',
+                schema: expect.objectContaining({ maximum: 10000, default: 10000 }),
+              }),
+              expect.objectContaining({ name: 'cursor', in: 'query' }),
+            ]),
           },
         },
       },
@@ -154,6 +166,7 @@ describe('v2 public contracts', () => {
   });
 });
 
+/** 各操作に共通する検証・コンテンツ交渉・例外変換を、実際のミドルウェアで確認する。 */
 describe('shared v2 operation pipeline', () => {
   it('uses the native Hono OpenAPI router', () => {
     expect(createV2App()).toBeInstanceOf(OpenAPIHono);

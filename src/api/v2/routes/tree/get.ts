@@ -1,26 +1,31 @@
 /**
- * treeの契約・全件スナップショット取得と、filesでも使うコミット固定の取得処理。
+ * コミット固定のツリーページ取得と、filesでも使うメタデータ結合処理。
  * @packageDocumentation
  */
 import { createRoute, type RouteHandler, z } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
+import { getRequiredEnvString } from '@/helpers/environmentHelper';
 import type { GitHubContext } from '@/services/githubService';
 import { TreePathUpdatedAtService } from '@/services/treePathUpdatedAtService';
 import type { AppEnv, Bindings } from '@/types/env';
 import { dependencyUnavailable, ProblemException } from '../../app';
-import { getGitHubContext, githubRequest } from '../../githubAdapter';
+import { issueTreeCursor, readTreeCursor } from '../../cursor';
+import { getGitHubContext } from '../../githubAdapter';
 import { validRepositoryPath as validPath } from '../../paths';
-import { dateTimeSchema, emptyRequest, failure, jsonMiddleware, readFailures, shaSchema } from '../common';
+import { dateTimeSchema, failure, jsonMiddleware, pageSchema, readFailures, shaSchema } from '../common';
 import type { filesSchema } from '../files/get';
 import { fileSchema } from '../files/schemas';
+import { loadTree } from './cache';
 
-/**
- * ツリーの公開項目を検証するZodスキーマ。
- *
- * ファイルのパス・raw URL・SHA・サイズ・更新日時に加え、modeとblob型を必須とする。
- * modeは通常ファイル・実行可能ファイル・シンボリックリンクの値を受け付ける。
- * 未定義の項目は拒否し、OpenAPIではTreeItemとして公開する。
- */
+/** 想定最大1万件を、件数による分割なしで取得できる既定値兼全体上限。 */
+const MAX_ITEMS = 10000;
+/** 全件検証・ソート・JSON生成のメモリ使用量を制限する内部スナップショットの上限。 */
+const MAX_SNAPSHOT_BYTES = 20 * 1024 * 1024;
+/** 実データからの1万件推計サイズに余裕を持たせた、公開ページ全体のJSONサイズ上限。 */
+const MAX_PAGE_BYTES = 8 * 1024 * 1024;
+/** JSON応答とパスのUTF-8バイト数を計算する。 */
+const encoder = new TextEncoder();
+/** 許可されたblobのファイル情報・mode・型を検証する公開スキーマ。 */
 const treeItemSchema = z
   .strictObject({
     ...fileSchema.shape,
@@ -29,69 +34,95 @@ const treeItemSchema = z
   })
   .openapi('TreeItem');
 
-/**
- * 全件ツリー取得の成功応答を検証するZodスキーマ。
- *
- * コミットSHA・生成日時・最大100,000件のツリー項目を必須とする。
- * 未定義の項目は拒否し、OpenAPIではTreeSnapshotとして公開する。
- * UTF-8 JSON全体の20 MiB上限はgetSnapshotで検証する。
- */
-export const treeSnapshotSchema = z
-  .strictObject({
-    commitSha: shaSchema,
-    generatedAt: dateTimeSchema,
-    items: z.array(treeItemSchema).max(100000),
-  })
-  .openapi('TreeSnapshot');
+/** 全件の検証用スキーマ。全体を検証してから最初のページを返す。 */
+export const treeSnapshotSchema = z.strictObject({
+  commitSha: shaSchema,
+  generatedAt: dateTimeSchema,
+  items: z.array(treeItemSchema).max(MAX_ITEMS),
+});
+/** 固定コミットのファイル一覧に、全件取得の完了判定に使う継続情報を付ける。 */
+const treePageSchema = treeSnapshotSchema.extend({ page: pageSchema }).openapi('TreeSnapshot');
+/** tree専用のlimitとcursorだけを許可し、未定義のクエリを拒否する。 */
+const treeQuerySchema = z.strictObject({
+  limit: z.coerce.number().int().min(1).max(MAX_ITEMS).openapi({ default: MAX_ITEMS }).optional(),
+  cursor: z.string().min(1).max(2048).optional(),
+});
 
-/**
- * 認証不要の全件ツリー取得操作（GET /v2/tree）のOpenAPIルート定義。
- *
- * 成功時はコミットに固定した全件スナップショットを200で返す。
- * 件数・応答サイズの上限超過による422と、読み取り操作の失敗応答を定義する。
- *
- * @remarks
- * パスパラメーター・リクエスト本文は使用せず、クエリパラメーターは受け付けない。
- * 対象リポジトリと既定ブランチはWorkerのバインディングで指定する。
- */
+/** 認証不要の、同一コミットに固定したツリーページ。 */
 export const getTree = createRoute({
   operationId: 'getTree',
   method: 'get',
   path: '/tree',
   description:
-    '同一コミットの全パスを使った翻訳の突合・削除判定のため、ページングせず全件を返す。' +
-    '上限は100,000件かつUTF-8 JSON応答全体20 MiB（20,971,520バイト）。' +
-    '超過時は422 SNAPSHOT_LIMIT_EXCEEDED、GitHubのツリー切り詰め時は502とし、部分的な一覧は返さない。',
+    '毎回全件取得する用途向け。limitは既定・最大10,000件、各ページのUTF-8 JSON応答は最大8 MiB。' +
+    'サイズ上限によりlimit未満でも続きがあるため、page.nextCursorがnullになるまで同じlimitで取得し、完了後にのみ削除判定する。' +
+    'cursorは取得開始から24時間有効で、全ページを同一コミットに固定する。' +
+    '最新コミットは60秒、SHA固定のGitHubツリーは1年間キャッシュする（保持は保証しない）。' +
+    '全スナップショットは最大10,000件・UTF-8 JSON 20 MiB。上限超過は422 SNAPSHOT_LIMIT_EXCEEDED、' +
+    'GitHubのツリー切り詰めは502とし、不完全な一覧は返さない。',
   security: [],
   middleware: jsonMiddleware,
-  request: emptyRequest,
+  request: { query: treeQuerySchema },
   responses: {
-    200: { description: 'ツリーの全件スナップショット。', content: { 'application/json': { schema: treeSnapshotSchema } } },
+    200: {
+      description: 'コミット固定のツリーページ。nextCursorがnullなら取得完了。',
+      content: { 'application/json': { schema: treePageSchema } },
+    },
     ...readFailures,
     422: failure,
   },
 });
 
 /**
- * デフォルトブランチの取得開始時点のコミットに固定した全件ツリーを返す。
- *
- * @param c Honoのリクエストコンテキスト。c.envからGitHub接続設定・対象リポジトリ・
- * 既定ブランチ・TREE_METADATA_DBを取得する。リクエスト固有の入力は使用しない。
- * @returns 件数・バイト数の上限を検証した、ステータス200の全件スナップショットのJSON応答。
- * @throws {ProblemException} 100,000件またはUTF-8 JSON全体20 MiBの上限超過時は422 SNAPSHOT_LIMIT_EXCEEDED。
- * @throws {HTTPException} GitHubの切り詰め・通信・応答検証の失敗は502、依存先の利用不可・回数制限は503。
+ * 件数・バイト数の両方で分割し、キャッシュが消えてもcursorのコミットから再構築する。
+ * 最初の応答前に全体を検証し、最終ページではnextCursorをnullにする。
+ * @param c 検証済みのクエリ・Workerバインディング・リクエストURLを持つコンテキスト。
+ * @returns 固定コミットのツリーページを含む200のJSON応答。公開ページ自体はキャッシュしない。
+ * @throws {ProblemException} cursor不正は400 INVALID_CURSOR、全体上限超過は422 SNAPSHOT_LIMIT_EXCEEDED。
+ * @throws {HTTPException} GitHubの切り詰め・不正応答は502、依存先の利用不可・回数制限は503。
  */
-export const getTreeHandler: RouteHandler<typeof getTree, AppEnv> = async (c) => c.json(await getSnapshot(c.env), 200);
+export const getTreeHandler: RouteHandler<typeof getTree, AppEnv> = async (c) => {
+  const query = c.req.valid('query');
+  const limit = query.limit ?? MAX_ITEMS;
+  const secret = `${c.env.TARGET_GH_OWNER}/${c.env.TARGET_GH_REPO}\n${getRequiredEnvString('TARGET_GH_APP_PRIVATE_KEY', c.env.TARGET_GH_APP_PRIVATE_KEY)}`;
+  const cursor = query.cursor ? await readTreeCursor(query.cursor, limit, secret) : undefined;
+  const snapshot = await getSnapshot(c.env, undefined, {
+    origin: new URL(c.req.url).origin,
+    commitSha: cursor?.commitSha,
+  });
+  const start = cursor?.offset ?? 0;
+  if (cursor && start >= snapshot.items.length) throw new ProblemException(400, 'INVALID_CURSOR');
+  const { items: all, ...header } = snapshot;
+  const items: typeof all = [];
+  // 最大長のcursorを予約し、署名の生成をページ当たり1回に抑える。
+  let bytes = encoder.encode(JSON.stringify({ ...header, items: [], page: { nextCursor: null } })).length + 2048;
+  for (const item of all.slice(start, start + limit)) {
+    const size = encoder.encode(JSON.stringify(item)).length + (items.length ? 1 : 0);
+    if (bytes + size > MAX_PAGE_BYTES) break;
+    bytes += size;
+    items.push(item);
+  }
+  if (!items.length && all.length) throw new ProblemException(422, 'SNAPSHOT_LIMIT_EXCEEDED');
+  const offset = start + items.length;
+  const nextCursor =
+    offset < all.length
+      ? await issueTreeCursor(
+          { commitSha: snapshot.commitSha, offset, limit, issuedAt: cursor?.issuedAt ?? Date.now() },
+          secret,
+        )
+      : null;
+  // updatedAtはコミットとは独立して更新されるため、公開ページ自体は長期キャッシュしない。
+  c.header('Cache-Control', 'no-store');
+  return c.json({ ...header, items, page: { nextCursor } }, 200);
+};
 
-const encoder = new TextEncoder();
 /**
- * 取得データを応答スキーマで検証し、不正な依存先データを502に変換する。
- *
- * @typeParam T 検証後のデータ型。
- * @param schema 期待する応答形式と検証後の型を定義したZodスキーマ。
- * @param value GitHubの応答やメタデータから組み立てた、検証前のデータ。
- * @returns スキーマに適合したデータ。
- * @throws {HTTPException} スキーマに適合しない場合は502。
+ * 不正な依存先データを公開応答へ流さない。
+ * @typeParam T スキーマ検証後の値の型。
+ * @param schema 公開応答として許可する形式のスキーマ。
+ * @param value GitHubとメタデータから組み立てた、検証前の値。
+ * @returns スキーマに適合した値。
+ * @throws {HTTPException} 値がスキーマに適合しない場合は502。
  */
 const parseUpstream = <T>(schema: z.ZodType<T>, value: unknown): T => {
   const result = schema.safeParse(value);
@@ -100,87 +131,56 @@ const parseUpstream = <T>(schema: z.ZodType<T>, value: unknown): T => {
 };
 
 /**
- * GitHubのツリー取得応答を検証するZodスキーマ。
- *
- * 切り詰めの有無を表すtruncatedと、各項目のパス・型・mode・SHAを必須とし、サイズは任意とする。
- * truncatedがtrueの場合の502応答はgetSnapshotで処理する。
- */
-const treeSchema = z.object({
-  truncated: z.boolean(),
-  tree: z.array(
-    z.object({
-      path: z.string(),
-      type: z.enum(['blob', 'tree', 'commit']),
-      mode: z.string(),
-      sha: shaSchema,
-      size: z.number().int().nonnegative().optional(),
-    }),
-  ),
-});
-
-/**
- * パスの各セグメントをエンコードし、取得時のコミットに固定したraw URLを作る。
- *
- * @param ctx 対象リポジトリのownerとrepoを取得するGitHubコンテキスト。
- * @param commit ファイルの取得先を固定するコミットSHA。
+ * パスの各セグメントをエンコードした、コミット固定のraw URLを作る。
+ * @param ctx 対象リポジトリのownerとrepoを含むGitHubコンテキスト。
+ * @param commit 取得先を固定するコミットSHA。
  * @param path 検証済みのリポジトリ相対ファイルパス。
- * @returns owner・repo・パスの各セグメントをURLエンコードしたraw.githubusercontent.comのURL。
+ * @returns owner・repo・パスの各セグメントをURLエンコードしたraw URL。
  */
 const rawUrl = (ctx: GitHubContext, commit: string, path: string): string =>
   `https://raw.githubusercontent.com/${encodeURIComponent(ctx.owner)}/${encodeURIComponent(ctx.repo)}/${commit}/${path.split('/').map(encodeURIComponent).join('/')}`;
 
 /**
- * 指定ファイルの情報と登録済み更新日時を、同じコミットに固定して取得する。
- *
- * @param env GitHub接続設定・対象リポジトリ・既定ブランチ・TREE_METADATA_DBを含むWorkerのバインディング。
- * @param paths 件数・重複条件を呼び出し元で検証済みの、リポジトリ相対ファイルパスの配列。
- * パスの安全性はこの関数で検証し、応答では指定順を維持する。
- * @returns コミットSHA・生成日時と、要求順のファイル情報・raw URL・更新日時を持つスナップショット。
- * 未登録の更新日時はnullとする。
+ * filesは従来どおり最新コミットを解決し、指定順で返す。
+ * @param env GitHub接続設定とTREE_METADATA_DBを含むWorkerのバインディング。
+ * @param paths 件数と重複条件を呼び出し元で検証済みのファイルパス。
+ * @returns 同じコミットのファイル情報を要求順に並べたスナップショット。
  * @throws {HTTPException} パス不正は400、対象不存在は404、依存先の障害は502または503。
  */
 export function getSnapshot(env: Bindings, paths: string[]): Promise<z.infer<typeof filesSchema>>;
 /**
- * 許可されたblob全件をUTF-8バイト順で返す、メタデータ付きスナップショットを取得する。
- *
- * @param env GitHub接続設定・対象リポジトリ・既定ブランチ・TREE_METADATA_DBを含むWorkerのバインディング。
- * @returns コミットSHA・生成日時と、パスのUTF-8バイト順に並べた全件ツリーを持つスナップショット。
- * 未登録の更新日時はnullとする。
- * @throws {ProblemException} 100,000件またはUTF-8 JSON全体20 MiB超過時は422 SNAPSHOT_LIMIT_EXCEEDED。
+ * 全ツリーをUTF-8パス順で返し、options指定時はコミット固定と共有キャッシュを利用する。
+ * @param env GitHub接続設定とTREE_METADATA_DBを含むWorkerのバインディング。
+ * @param paths 全件取得では省略する。
+ * @param options キャッシュキー用originと、継続取得で固定する任意のコミットSHA。
+ * @returns 件数・バイト数を検証済みの全件スナップショット。未登録の更新日時はnull。
+ * @throws {ProblemException} 10,000件または内部JSON全体20 MiBの超過時は422 SNAPSHOT_LIMIT_EXCEEDED。
  * @throws {HTTPException} GitHubの切り詰め・不正応答は502、依存先の利用不可は503。
  */
-export function getSnapshot(env: Bindings): Promise<z.infer<typeof treeSnapshotSchema>>;
+export function getSnapshot(
+  env: Bindings,
+  paths?: undefined,
+  options?: { origin: string; commitSha?: string },
+): Promise<z.infer<typeof treeSnapshotSchema>>;
 /**
- * コミットを一度だけ解決し、完全なツリーと登録済み更新日時を結合する共通実装。
- *
- * @param env GitHub接続設定・対象リポジトリ・既定ブランチ・TREE_METADATA_DBを含むWorkerのバインディング。
- * @param paths 取得するファイルのリポジトリ相対パスの配列。省略時は許可されたblob全件を取得する。
- * 指定時の件数・重複条件は呼び出し元で検証する。
- * @returns paths指定時は要求順のファイル情報、省略時はパスのUTF-8バイト順の全件ツリー。
- * いずれも同じコミットのSHA・生成日時・登録済み更新日時を含む。
- * @throws {ProblemException} 全件取得が100,000件またはUTF-8 JSON全体20 MiBを超える場合は422 SNAPSHOT_LIMIT_EXCEEDED。
- * @throws {HTTPException} パス不正は400、指定ファイルの不存在は404、GitHubの切り詰め・通信・応答検証の失敗は502、
- * 依存先の利用不可・回数制限やメタデータDBの未設定・読み取り失敗は503。
+ * 同一コミットのGitHubツリーと、各リクエスト時点の登録済み更新日時を結合する共通実装。
+ * @param env GitHub接続設定・対象リポジトリ・メタデータDBのバインディング。
+ * @param paths 指定時は要求順のファイル情報、省略時は許可されたblob全件を取得する。
+ * @param options tree用の共有キャッシュとコミット固定の条件。
+ * @returns コミットSHA・生成日時と、全件ツリーまたは指定ファイル情報。
+ * @throws {ProblemException} 全件取得の件数・JSONサイズ上限を超える場合は422 SNAPSHOT_LIMIT_EXCEEDED。
+ * @throws {HTTPException} パス不正は400、指定ファイルの不存在は404、依存先の障害は502または503。
  */
 export async function getSnapshot(
   env: Bindings,
   paths?: string[],
+  options?: { origin: string; commitSha?: string },
 ): Promise<z.infer<typeof treeSnapshotSchema> | z.infer<typeof filesSchema>> {
   if (paths && !paths.every(validPath)) throw new HTTPException(400);
   const ctx = await getGitHubContext(env);
-  const { octokit, owner, repo, defaultBranch } = ctx;
-  const commitSha = await githubRequest(
-    async () =>
-      z
-        .object({ commit: z.object({ sha: shaSchema }) })
-        .parse((await octokit.rest.repos.getBranch({ owner, repo, branch: defaultBranch })).data).commit.sha,
-  );
-  const tree = await githubRequest(async () =>
-    treeSchema.parse((await octokit.rest.git.getTree({ owner, repo, tree_sha: commitSha, recursive: 'true' })).data),
-  );
-  if (tree.truncated) throw new HTTPException(502);
+  const { commitSha, tree } = await loadTree(ctx, options);
   const blobs = tree.tree.filter((item) => item.type === 'blob' && validPath(item.path));
-  if (!paths && blobs.length > 100000) throw new ProblemException(422, 'SNAPSHOT_LIMIT_EXCEEDED');
+  if (!paths && blobs.length > MAX_ITEMS) throw new ProblemException(422, 'SNAPSHOT_LIMIT_EXCEEDED');
   const byPath = paths ? new Map(blobs.map((item) => [item.path, item])) : undefined;
   const selected = paths
     ? paths.map((path) => {
@@ -207,12 +207,10 @@ export async function getSnapshot(
   }
   const snapshot = { commitSha, generatedAt: new Date().toISOString() };
   /**
-   * 選択済みblobにコミット固定URLと登録済み更新日時を付け、公開スキーマで検証する。
-   *
-   * @param item GitHubのツリーから選択した、許可パスのblob項目。
-   * @returns パス・SHA・サイズ・コミット固定raw URL・更新日時を持つファイル情報。
-   * 更新日時が未登録の場合はnullとする。
-   * @throws {HTTPException} 組み立てたファイル情報が公開スキーマに適合しない場合は502。
+   * 選択したblobにコミット固定URLと最新の登録済み更新日時を付ける。
+   * @param item パスで選択・検証したGitHubのblob項目。
+   * @returns 公開スキーマで検証済みのファイル情報。未登録の更新日時はnull。
+   * @throws {HTTPException} ファイル情報が公開スキーマに適合しない場合は502。
    */
   const file = (item: (typeof selected)[number]): z.infer<typeof fileSchema> =>
     parseUpstream(fileSchema, {
@@ -226,10 +224,9 @@ export async function getSnapshot(
   const items: z.infer<typeof treeSnapshotSchema>['items'] = [];
   let bytes = encoder.encode(JSON.stringify({ ...snapshot, items: [] })).length;
   for (const item of selected) {
-    const value = parseUpstream(treeSnapshotSchema.shape.items.element, { ...file(item), mode: item.mode, type: 'blob' });
-    // 全体の巨大なJSONを作る前に、区切り文字を含む正確なUTF-8サイズを確認する。
+    const value = parseUpstream(treeItemSchema, { ...file(item), mode: item.mode, type: 'blob' });
     bytes += encoder.encode(JSON.stringify(value)).length + (items.length > 0 ? 1 : 0);
-    if (bytes > 20971520) throw new ProblemException(422, 'SNAPSHOT_LIMIT_EXCEEDED');
+    if (bytes > MAX_SNAPSHOT_BYTES) throw new ProblemException(422, 'SNAPSHOT_LIMIT_EXCEEDED');
     items.push(value);
   }
   return { ...snapshot, items };

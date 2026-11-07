@@ -412,11 +412,27 @@
         "tags": [
           "tree"
         ],
-        "summary": "ツリー全件を取得する",
+        "summary": "コミット固定のツリーページを取得する",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 10000, "default": 10000 },
+            "description": "ページ件数の上限。JSONサイズ上限により、この件数未満でも次ページがある。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "minLength": 1, "maxLength": 2048 },
+            "description": "前ページのnextCursor。同じlimitで使用する。取得開始から24時間有効。"
+          }
+        ],
         "security": [],
         "responses": {
           "200": {
-            "description": "ツリーの全件スナップショット。",
+            "description": "コミット固定のツリーページ。nextCursorがnullなら取得完了。",
             "content": {
               "application/json": {
                 "schema": {
@@ -447,7 +463,7 @@
             "$ref": "#/components/responses/Other"
           }
         },
-        "description": "同一コミットのファイル一覧と更新日時を含む全件スナップショット。"
+        "description": "毎回全件取得する用途向け。limitは既定・最大10,000件、各ページのUTF-8 JSON応答は最大8 MiB。page.nextCursorがnullになるまで同じlimitで取得し、完了後にのみ削除判定する。cursorは取得開始から24時間有効で、全ページを同一コミットに固定する。最新コミットは60秒、SHA固定のGitHubツリーは1年間キャッシュする（保持は保証しない）。updatedAtは各リクエストでDBから取得する。全スナップショットは最大10,000件・UTF-8 JSON 20 MiB。上限超過は422 SNAPSHOT_LIMIT_EXCEEDED、GitHubのツリー切り詰めは502とし、不完全な一覧は返さない。"
       }
     },
     "/v2/files": {
@@ -838,7 +854,7 @@
         }
       },
       "SnapshotLimit": {
-        "description": "ツリーが100,000件または応答サイズ20 MiBの上限を超過。",
+        "description": "ツリー全体が10,000件または全スナップショットのUTF-8 JSONサイズ20 MiBの上限を超過。",
         "content": {
           "application/problem+json": {
             "schema": {
@@ -1432,13 +1448,17 @@
             "items": {
               "$ref": "#/components/schemas/TreeItem"
             },
-            "maxItems": 100000
+            "maxItems": 10000
+          },
+          "page": {
+            "$ref": "#/components/schemas/Page"
           }
         },
         "required": [
           "commitSha",
           "generatedAt",
-          "items"
+          "items",
+          "page"
         ]
       },
       "File": {

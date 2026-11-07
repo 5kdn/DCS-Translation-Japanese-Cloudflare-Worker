@@ -1,3 +1,8 @@
+/**
+ * tree取得のコミット固定・UTF-8順序・全体サイズ上限・依存先障害を実ルートで検証する。
+ * GitHubとメタデータDBの応答だけをモックし、公開応答は契約スキーマへ照合する。
+ * @packageDocumentation
+ */
 import { describe, expect, it, vi } from 'vitest';
 import { expectV2Contract } from '../../../../../helpers/v2Contract';
 import { blob, mocks, request, sha } from '../../../../../helpers/v2Read';
@@ -5,6 +10,7 @@ import { blob, mocks, request, sha } from '../../../../../helpers/v2Read';
 vi.mock('octokit', async () => (await import('../../../../../helpers/v2Read')).octokitMock);
 vi.mock('@/services/treePathUpdatedAtService', async () => (await import('../../../../../helpers/v2Read')).metadataMock);
 
+/** ページ分割の前に全体を検証し、不完全なツリーを成功扱いしないことを確認する。 */
 describe('GET /v2/tree', () => {
   it('pins tree, raw URLs and metadata to a commit and sorts paths by UTF-8 bytes', async () => {
     const paths = ['UserMissions/z.lua', 'DCSWorld/𐀀.lua', 'DCSWorld/\ue000.lua', 'DCSWorld/a.lua'];
@@ -24,18 +30,14 @@ describe('GET /v2/tree', () => {
     expect(JSON.stringify(body)).toContain(`raw.githubusercontent.com/test-owner/test-repo/${sha}/`);
   });
 
-  it('checks the 100,000 item boundary before loading metadata and applies the byte limit independently', async () => {
-    const tree = Array.from({ length: 100000 }, (_, i) => blob(`DCSWorld/${i}`));
-    mocks.tree.mockResolvedValue({ data: { truncated: false, tree } });
-    // このfixtureは件数上限内でも20 MiBを超えるため、メタデータ取得後に拒否される。
-    expect((await request('/tree')).status).toBe(422);
-    expect(mocks.metadata).toHaveBeenCalledOnce();
-    mocks.metadata.mockClear();
-    tree.push(blob('DCSWorld/100000'));
+  it('rejects a truncated GitHub tree without caching it or loading metadata', async () => {
+    mocks.tree.mockResolvedValueOnce({ data: { truncated: true, tree: [blob()] } });
     const response = await request('/tree');
-    expect(response.status).toBe(422);
-    expect(await expectV2Contract(response, 'getTree')).toMatchObject({ code: 'SNAPSHOT_LIMIT_EXCEEDED' });
+    expect(response.status).toBe(502);
+    await expectV2Contract(response, 'getTree');
     expect(mocks.metadata).not.toHaveBeenCalled();
+    expect((await request('/tree')).status).toBe(200);
+    expect(mocks.tree).toHaveBeenCalledTimes(2);
   });
 
   it('rejects JSON responses over 20 MiB measured in UTF-8 bytes', async () => {
@@ -73,10 +75,15 @@ describe('GET /v2/tree', () => {
     mocks.tree.mockResolvedValue({ data: { truncated: false, tree } });
     const response = await request('/tree');
     expect(response.status).toBe(200);
-    expect(new TextEncoder().encode(await response.text()).length).toBe(limit);
+    const body = (await response.json()) as { items: unknown[]; page: { nextCursor: string | null } };
+    expect(body.items.length).toBeLessThan(tree.length);
+    expect(body.page.nextCursor).toBeTruthy();
     const first = tree[0];
     if (!first) throw new Error('Missing fixture');
     first.size = first.size === 1 ? 12 : 123;
+    await (await caches.open('v2-tree')).delete(
+      `https://api.dcs-translation-japanese.workers.dev/__tree-cache/v1/test-owner/test-repo/tree/${sha}`,
+    );
     const over = await request('/tree');
     expect(over.status).toBe(422);
     expect(await expectV2Contract(over, 'getTree')).toMatchObject({ code: 'SNAPSHOT_LIMIT_EXCEEDED' });
