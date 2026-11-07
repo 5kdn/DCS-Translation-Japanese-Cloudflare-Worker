@@ -2,7 +2,7 @@
 import { HTTPException } from 'hono/http-exception';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getGitHubContext } from '@/api/v2/githubAdapter';
-import { createTestBindings } from '../helpers/environment';
+import { createTestBindings } from '../../../helpers/environment';
 
 const mocks = vi.hoisted(() => ({ app: vi.fn(), authenticate: vi.fn(), octokit: {} }));
 vi.mock('octokit', () => ({
