@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.0.0](https://github.com/dcs-translation-japanese/api/compare/v1.5.5...v2.0.0) (2026-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **v2:** GET /v2/tree now requires following page.nextCursor until null; the snapshot item limit is 10,000.
+
+### Features
+
+* v2 APIのZod定義・共通応答・契約テスト基盤を整備する ([#167](https://github.com/dcs-translation-japanese/api/issues/167)) ([52ed38d](https://github.com/dcs-translation-japanese/api/commit/52ed38d30cac77fef02cdf0cfa807f77af7a32e0))
+* **v2:** Issue作成・編集とPR作成に共有回数制限を実装 ([#169](https://github.com/dcs-translation-japanese/api/issues/169)) ([dedfff8](https://github.com/dcs-translation-japanese/api/commit/dedfff8aaf458ef438c50f81acea53a839d59fb3))
+* **v2:** OIDC限定のメタデータ一括更新を実装 ([#165](https://github.com/dcs-translation-japanese/api/issues/165)) ([#170](https://github.com/dcs-translation-japanese/api/issues/170)) ([cc4849b](https://github.com/dcs-translation-japanese/api/commit/cc4849b69667510fa55298c5a73aa8dc34270cd6))
+* **v2:** tree取得APIにコミット固定のページネーションを追加 ([#176](https://github.com/dcs-translation-japanese/api/issues/176)) ([b8d45f7](https://github.com/dcs-translation-japanese/api/commit/b8d45f785bda5ca99ad32f804d10cf62d2adc8ba))
+* **v2:** 認証不要の読み取りAPIを実装 ([#168](https://github.com/dcs-translation-japanese/api/issues/168)) ([48f7cbd](https://github.com/dcs-translation-japanese/api/commit/48f7cbd4e1d08bfee63a66a3ce1fab67ef7672e0)), closes [#163](https://github.com/dcs-translation-japanese/api/issues/163)
+* 正式API URLを追加し旧URLの並列提供を維持する ([#160](https://github.com/dcs-translation-japanese/api/issues/160)) ([bcf9b68](https://github.com/dcs-translation-japanese/api/commit/bcf9b68a7ba4fc68f366b0ed525bf5d58d1ce78d))
+
+
+### Bug Fixes
+
+* paginate GitHub issue listing ([#173](https://github.com/dcs-translation-japanese/api/issues/173)) ([f2cbcd7](https://github.com/dcs-translation-japanese/api/commit/f2cbcd709bb47c0d2b038b95b29e99e141d4919c))
+* translationsのOrg参照先と検証済みinstallationの公開手順を準備する ([#145](https://github.com/dcs-translation-japanese/api/issues/145)) ([0abadf9](https://github.com/dcs-translation-japanese/api/commit/0abadf94bddba20dab8d1af7914acc3d4b62b2f1))
+* **v2:** ツリー全件取得の制約を公開仕様に明記する ([#166](https://github.com/dcs-translation-japanese/api/issues/166)) ([#171](https://github.com/dcs-translation-japanese/api/issues/171)) ([94e9c67](https://github.com/dcs-translation-japanese/api/commit/94e9c674c5ad21e4ad7108f2f1acfe0b2fd29234))
+* verify the immutable translations OIDC subject ([#150](https://github.com/dcs-translation-japanese/api/issues/150)) ([9b82d76](https://github.com/dcs-translation-japanese/api/commit/9b82d76f8cb859e8a2a42ed88bcd2d042973e827))
+* 移管期間中の新旧Pages originを許可する ([#144](https://github.com/dcs-translation-japanese/api/issues/144)) ([8c4b7c6](https://github.com/dcs-translation-japanese/api/commit/8c4b7c6fe9516fc6c3661366b94ead4a382c211e))
+
 ## [1.5.5](https://github.com/dcs-translation-japanese/api/compare/v1.5.4...v1.5.5) (2026-10-28)
 
 
