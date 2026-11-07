@@ -32,7 +32,7 @@
 
 ### Cloudflare CLI
 
-Node.js 24 と pnpm 10 を使用します。Worker の設定は `cloudflare.config.ts`、ビルドと開発サーバーの設定は `vite.config.mts` で管理しています。
+Node.js 24 と pnpm 11 系を使用します。pnpm のバージョン範囲は `package.json` の `devEngines.packageManager` に指定し、GitHub Actions でも同じ指定を使用します。Worker の設定は `cloudflare.config.ts`、ビルドと開発サーバーの設定は `vite.config.mts` で管理しています。
 cf と Cloudflare Vite プラグインは beta 版のため、動作確認済みのバージョンに固定しています。
 
 `pnpm dev` は `src/index.dev.ts`、`pnpm start` とデプロイは `src/index.ts` を使用します。
