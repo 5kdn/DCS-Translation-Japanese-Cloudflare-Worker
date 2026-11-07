@@ -5,7 +5,7 @@
 import { createRoute, type RouteHandler } from '@hono/zod-openapi';
 import { HTTPException } from 'hono/http-exception';
 import type { AppEnv } from '@/types/env';
-import { getGitHubContext, githubRequest } from '../../github';
+import { getGitHubContext, githubRequest } from '../../githubAdapter';
 import { emptyRequest, failure, jsonMiddleware, numberParamSchema, readFailures } from '../common';
 import { githubIssueSchema, issueSchema, toIssue } from './schemas';
 

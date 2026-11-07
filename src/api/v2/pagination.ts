@@ -6,7 +6,7 @@ import { getRequiredEnvString } from '@/helpers/environmentHelper';
 import type { GitHubContext } from '@/services/githubService';
 import type { Bindings } from '@/types/env';
 import { type Boundary, issueCursor, type PageConditions, readCursor } from './cursor';
-import { getGitHubContext, githubRequest } from './github';
+import { getGitHubContext, githubRequest } from './githubAdapter';
 
 /** GitHubのIssue一覧とPR一覧に共通する、ページ取得時の条件。 */
 type ListParameters = {

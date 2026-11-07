@@ -8,6 +8,7 @@ import type { Context, MiddlewareHandler } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import { consumeV2WriteAttempt } from '@/services/v2WriteRateLimiterService';
 import type { AppEnv } from '@/types/env';
 import type { problemSchema } from './routes/common';
 
@@ -78,6 +79,27 @@ export const problem = (
 };
 
 /**
+ * 依存先の利用不可を示す503例外を、整数秒の再試行案内付きで作る。
+ *
+ * @param seconds 再試行まで待つ秒数。省略時は60秒。
+ * @returns Retry-Afterを保持するHTTP例外。
+ */
+export const dependencyUnavailable = (seconds = 60): HTTPException =>
+  new HTTPException(503, {
+    res: new Response(null, { status: 503, headers: { 'Retry-After': String(seconds) } }),
+  });
+
+/**
+ * v2の共有書き込み回数制限が適用される操作か判定する。
+ *
+ * @param method リクエストのHTTPメソッド。
+ * @param path リクエストのパス（/v2を含み、クエリ文字列を含まない）。
+ * @returns Issue作成・Issue編集・PR作成のいずれかに該当する場合はtrue。
+ */
+const isWriteRateLimitedRequest = (method: string, path: string): boolean =>
+  (method === 'POST' && /^\/v2\/(issues|prs)\/?$/.test(path)) || (method === 'PATCH' && /^\/v2\/issues\/[^/]+\/?$/.test(path));
+
+/**
  * v2専用の共通ミドルウェアと例外処理を設定したアプリを作成する。
  * リクエストターゲットは8192バイト、本文は5 MiBを上限とする。
  *
@@ -100,6 +122,19 @@ export const createV2App = (): OpenAPIHono<AppEnv> => {
     return problem(c, 500);
   });
   app.use('*', async (c, next) => {
+    if (isWriteRateLimitedRequest(c.req.method, c.req.path)) {
+      const ip = c.req.header('CF-Connecting-IP');
+      const db = c.env.TREE_METADATA_DB;
+      // Cloudflareが設定する送信元だけを信頼し、共有状態を使えない場合は書き込まない。
+      if (!ip || !db) return problem(c, 503, { 'Retry-After': '60' });
+      try {
+        const retryAfter = await consumeV2WriteAttempt(db, ip);
+        if (retryAfter !== null) return problem(c, 429, { 'Retry-After': String(retryAfter) });
+      } catch (error) {
+        console.error('v2 write rate limiter unavailable', error);
+        return problem(c, 503, { 'Retry-After': '60' });
+      }
+    }
     const url = new URL(c.req.url);
     if (new TextEncoder().encode(url.pathname + url.search).length > 8192) return problem(c, 414);
     // 単値クエリの重複はHonoによる先頭値への変換前に拒否する。

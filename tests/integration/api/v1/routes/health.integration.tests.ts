@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import app from '@/index';
-import { createTestBindings } from '../../helpers/environment';
+import { createTestBindings } from '../../../../helpers/environment';
 
 describe('GET /health', () => {
   it('稼働状態を返す', async () => {

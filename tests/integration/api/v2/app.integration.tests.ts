@@ -12,9 +12,9 @@ import { createV2App } from '@/api/v2/app';
 import { openApiSchema, routes } from '@/api/v2/routes';
 import { issueCreateSchema } from '@/api/v2/routes/issue/create';
 import worker from '@/index';
-import specification from '../../fixtures/v2-openapi.json';
-import { createTestBindings } from '../../helpers/environment';
-import { expectV2Contract } from '../../helpers/v2Contract';
+import specification from '../../../fixtures/v2-openapi.json';
+import { createTestBindings } from '../../../helpers/environment';
+import { expectV2Contract } from '../../../helpers/v2Contract';
 
 /**
  * 正式ホスト宛てのリクエストをWorkerへ直接渡す。

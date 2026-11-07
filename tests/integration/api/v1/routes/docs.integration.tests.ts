@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import app from '@/index';
-import { createTestBindings } from '../../helpers/environment';
+import { createTestBindings } from '../../../../helpers/environment';
 
 describe('GET /docs', () => {
   it('Swagger UI のHTMLを返す', async () => {
