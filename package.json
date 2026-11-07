@@ -3,7 +3,12 @@
   "version": "1.5.5",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.33.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11"
+    }
+  },
   "scripts": {
     "deploy": "pnpm generate && node scripts/deploy.mjs",
     "dev": "pnpm generate && cf dev --mode development",
