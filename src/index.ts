@@ -27,8 +27,7 @@ app.use('*', async (c, next) => {
 /** 旧APIの仕様書は、従来どおりCORSミドルウェアより先に応答する。 */
 app.get('/openapi.json', getOpenApi);
 
-app.use(
-  '*',
+app.use('*', (c, next) =>
   cors({
     origin: (origin, c) => {
       if (!origin) return null;
@@ -38,12 +37,12 @@ app.use(
         .filter(Boolean);
       return allows.includes(origin) ? origin : null;
     },
-    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowMethods: c.req.path.startsWith('/v2/') ? ['GET', 'POST', 'PATCH', 'OPTIONS'] : ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
-    exposeHeaders: ['Deprecation', 'Sunset'],
+    exposeHeaders: c.req.path.startsWith('/v2/') ? ['Deprecation', 'Sunset', 'Retry-After'] : ['Deprecation', 'Sunset'],
     credentials: true,
     maxAge: 24 * 60 * 60,
-  }),
+  })(c, next),
 );
 
 /** v2の入力検証・エラー形式は専用アプリ内に閉じ、旧APIへ適用しない。 */

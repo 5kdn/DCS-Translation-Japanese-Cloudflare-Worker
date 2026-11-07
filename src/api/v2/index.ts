@@ -1,6 +1,6 @@
 /**
- * v2の公開ルート・読み取り操作を登録し、全操作のOpenAPI仕様を配信する。
- * 未実装の書き込み操作は仕様への掲載のみで、実行しない。
+ * v2の公開ルート・読み書き操作を登録し、全操作のOpenAPI仕様を配信する。
+ * 未実装のメタデータ更新操作は仕様への掲載のみで、実行しない。
  * @packageDocumentation
  */
 import { OpenAPIHono } from '@hono/zod-openapi';
@@ -37,11 +37,8 @@ app.openapi(routes.getOpenApi, (c) =>
 );
 registerDocsRoutes(app);
 
-for (const route of Object.values(routes)) {
-  if (route.method === 'get') continue;
-  const { middleware: _middleware, ...definition } = route;
-  app.openAPIRegistry.registerPath(definition);
-}
+const { middleware: _middleware, ...metadataDefinition } = routes.upsertTreeMetadata;
+app.openAPIRegistry.registerPath(metadataDefinition);
 app.openAPIRegistry.registerComponent('securitySchemes', 'githubActionsOidc', {
   type: 'http',
   scheme: 'bearer',

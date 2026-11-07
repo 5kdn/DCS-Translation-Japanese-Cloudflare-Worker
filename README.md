@@ -56,6 +56,20 @@ CI の独立した各ジョブとデプロイも同じスクリプトを使う�
 本番反映は Release 公開時の GitHub Actions を使用します。手動で反映する場合も `Deploy to Cloudflare` Workflow を実行します。
 GitHub Actions は `CLOUDFLARE_ACCOUNT_ID`、`CLOUDFLARE_API_TOKEN`、`TARGET_GH_SECRET` のリポジトリシークレットを使用します。
 
+### v2の匿名書き込みと共有回数制限
+
+`POST /v2/issues`、`PATCH /v2/issues/{number}`、`POST /v2/prs` はログイン不要です。Issueの編集は、作成者や作成経路・状態によらず、設定された対象リポジトリのタイトル・本文だけを変更します。PRをIssueとして編集することはできません。
+
+3操作は送信元IPごとに、直近300秒の合計10回までの枠を共有します。入力エラーやGitHub側の失敗も数え、超過時は `429 application/problem+json` と整数秒の `Retry-After` を返します。拒否したアクセスでは待ち時間を延長しません。読み取り・OIDCメタデータ更新・旧APIはこの枠に含みません。
+
+履歴は既存の `TREE_METADATA_DB` に保存し、D1のトランザクションでWorkerインスタンス間の同時実行を制御します。保存するのはIPのSHA-256ハッシュと試行日時で、期限切れ履歴は次の書き込みリクエストで削除します。`CF-Connecting-IP` またはDBを使えない場合は、制限を省略せず503で書き込みを拒否します。
+
+デプロイ前に、`migrations/0003_v2_write_rate_limits.sql` を `TREE_METADATA_DB` に適用してください。既存データの削除は不要です。`0002_used_jti.sql` は別の `JWT_REPLAY_DB` 用なので、このDBへまとめて適用しないでください。ローカル開発でも同じテーブルが必要です。
+
+PRは許可されたファイルパスの追加・更新・削除から作成します。既存ブランチ名との衝突は409で拒否し、既存ブランチの上書きやforce pushは行いません。途中でGitHub操作が失敗すると作成済みブランチが残るため、再送時は新しいブランチ名を指定してください。
+
+第三者もIssueを書き換えられます。同じIPの利用者は枠を共有し、旧API経由の書き込みにはこの制限が適用されません。
+
 ### メタデータ送信のOIDC subject
 
 `TREE_METADATA_OIDC_SUBJECT` は、translationsのOIDC設定と実claimで確認した `repo:dcs-translation-japanese@346855332/translations@1098927315:pull_request` を指定します。
