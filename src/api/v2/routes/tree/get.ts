@@ -58,6 +58,10 @@ export const getTree = createRoute({
   operationId: 'getTree',
   method: 'get',
   path: '/tree',
+  description:
+    '同一コミットの全パスを使った翻訳の突合・削除判定のため、ページングせず全件を返す。' +
+    '上限は100,000件かつUTF-8 JSON応答全体20 MiB（20,971,520バイト）。' +
+    '超過時は422 SNAPSHOT_LIMIT_EXCEEDED、GitHubのツリー切り詰め時は502とし、部分的な一覧は返さない。',
   security: [],
   middleware: jsonMiddleware,
   request: emptyRequest,

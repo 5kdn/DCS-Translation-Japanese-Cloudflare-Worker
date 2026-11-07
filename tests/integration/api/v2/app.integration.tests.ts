@@ -41,6 +41,19 @@ describe('v2 public contracts', () => {
     if (operation === 'getDocs') expect(body).toContain('/v2/openapi.json');
   });
 
+  it('documents the full-tree exception, limits and failures in the public OpenAPI', async () => {
+    const document = openApiSchema.parse(await (await request('/v2/openapi.json')).json());
+    expect(document).toMatchObject({
+      paths: {
+        '/v2/tree': {
+          get: {
+            description: expect.stringMatching(/ページング.*100,000.*20 MiB.*20,971,520.*422.*SNAPSHOT_LIMIT_EXCEEDED.*502/),
+          },
+        },
+      },
+    });
+  });
+
   it.each(['/v2/health', '/v2/openapi.json', '/v2/docs'])('HEAD %s returns headers without a body', async (path) => {
     const response = await request(path, { method: 'HEAD' });
     expect(response.status).toBe(200);
