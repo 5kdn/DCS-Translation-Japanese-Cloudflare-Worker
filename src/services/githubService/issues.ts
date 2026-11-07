@@ -58,7 +58,7 @@ export const getIssues = async (
 ): Promise<GetIssuesResult | GitHubOperationFailure> => {
   const { octokit, owner, repo } = ctx;
   try {
-    const result = await octokit.rest.issues.listForRepo({
+    const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
       owner,
       repo,
       state: req.state ?? 'open',
@@ -67,7 +67,7 @@ export const getIssues = async (
       per_page: 100,
     });
 
-    return result.data
+    return issues
       .filter((issue) => !issue.pull_request)
       .map((issue) => ({
         issueNumber: issue.number,
