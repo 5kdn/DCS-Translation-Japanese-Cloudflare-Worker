@@ -1,6 +1,5 @@
 /**
  * v2の公開ルート・読み書き操作を登録し、全操作のOpenAPI仕様を配信する。
- * 未実装のメタデータ更新操作は仕様への掲載のみで、実行しない。
  * @packageDocumentation
  */
 import { OpenAPIHono } from '@hono/zod-openapi';
@@ -12,6 +11,7 @@ import { registerHealthRoutes } from './routes/health';
 import { registerIssueRoutes } from './routes/issue';
 import { registerPullRequestRoutes } from './routes/pull-request';
 import { registerTreeRoutes } from './routes/tree';
+import { registerTreeMetadataRoutes } from './routes/tree-metadata';
 
 const app = createV2App();
 registerHealthRoutes(app);
@@ -19,6 +19,8 @@ registerIssueRoutes(app);
 registerPullRequestRoutes(app);
 registerTreeRoutes(app);
 registerFileRoutes(app);
+registerTreeMetadataRoutes(app);
+
 app.openapi(routes.getOpenApi, (c) =>
   c.json(
     openApiSchema.parse(
@@ -37,8 +39,6 @@ app.openapi(routes.getOpenApi, (c) =>
 );
 registerDocsRoutes(app);
 
-const { middleware: _middleware, ...metadataDefinition } = routes.upsertTreeMetadata;
-app.openAPIRegistry.registerPath(metadataDefinition);
 app.openAPIRegistry.registerComponent('securitySchemes', 'githubActionsOidc', {
   type: 'http',
   scheme: 'bearer',
@@ -52,4 +52,5 @@ for (const path of ['/health', '/openapi.json', '/docs']) {
   app.all(path, (c) => problem(c, 405, { Allow: 'GET, HEAD' }));
 }
 app.all('*', (c) => problem(c, 404));
+
 export default app;

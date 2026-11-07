@@ -7,7 +7,11 @@ export class ClaimValidationError extends Error {
    * @param {unknown} expected 期待する値を指定する。
    * @param {unknown} actual 実際の値を指定する。
    */
-  constructor(claim: string, expected: unknown, actual: unknown) {
+  constructor(
+    readonly claim: string,
+    expected: unknown,
+    actual: unknown,
+  ) {
     super(`Invalid claim: ${claim} expected ${JSON.stringify(expected)} but got ${JSON.stringify(actual)}`);
     this.name = 'ClaimValidationError';
   }

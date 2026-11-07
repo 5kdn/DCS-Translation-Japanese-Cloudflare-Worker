@@ -31,6 +31,14 @@ export class TreePathUpdatedAtService {
   }
 
   /**
+   * v2の一括更新を分割せず、1つのD1トランザクションとして保存する。
+   * @param files 検証済みの更新対象（1〜1000件）。
+   */
+  public async upsertAtomic(files: TreePathUpdatedAtItem[]): Promise<void> {
+    await this.runWithRetry(() => this.upsertTransaction(files), 'tree_path_updated_at.upsertAtomic');
+  }
+
+  /**
    * @summary tree_path_updated_atの全件を読み取る。
    * @returns パスをキー、更新時刻を値とするRecordを返す。
    */
