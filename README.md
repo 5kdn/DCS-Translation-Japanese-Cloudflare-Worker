@@ -6,26 +6,18 @@
 
 正式URL: [https://api.dcs-translation-japanese.workers.dev](https://api.dcs-translation-japanese.workers.dev)
 
-- [APIドキュメント](https://api.dcs-translation-japanese.workers.dev/docs)
-- [OpenAPI](https://api.dcs-translation-japanese.workers.dev/openapi.json)
+エンドポイント・パラメータ・応答仕様はSwagger UIを参照してください。
+
+- [Swagger UI（v1）](https://api.dcs-translation-japanese.workers.dev/docs)
+- [Swagger UI（v2）](https://api.dcs-translation-japanese.workers.dev/v2/docs)
+- [OpenAPI（v1）](https://api.dcs-translation-japanese.workers.dev/openapi.json)
+- [OpenAPI（v2）](https://api.dcs-translation-japanese.workers.dev/v2/openapi.json)
 - [旧URL](https://dcs-translation-japanese-cloudflare-worker.dcs-translation-japanese.workers.dev)
 
 > [!IMPORTANT]
 > 旧URLは非推奨ですが、既存クライアント向けに提供を継続します。新規利用には正式URLを使用してください。
 >
 > 旧URLの廃止期限は **2027年12月31日23:59:59（日本時間）** です。それまでに正式URLへ移行してください。
-
-## エンドポイント
-
-- `/health`（疎通確認）
-- `/tree`（リポジトリツリー取得）
-- `/issue`
-  - `/list`（GitHub の Issue 一覧を取得）
-  - `/create`（GitHub の Issue を作成）
-- `/create-pr`（ファイル差分から PR 作成）
-- `/download-zip`（指定パスの ZIP 生成）
-- `/download-file-paths` (指定パスの GitHub Raw URL一覧を返却)
-- `/docs`（Swagger UI）
 
 ## 実行と開発手順
 
