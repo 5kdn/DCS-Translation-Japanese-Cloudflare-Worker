@@ -1,5 +1,5 @@
 {
-  "name": "dcs-translation-japanese-cloudflare-worker",
+  "name": "@dcs-translation-japanese/api",
   "version": "2.0.0",
   "private": true,
   "type": "module",
