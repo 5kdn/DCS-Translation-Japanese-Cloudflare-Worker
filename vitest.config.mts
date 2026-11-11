@@ -3,7 +3,7 @@ import { cloudflareTest } from '@cloudflare/vitest-plugin';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [cloudflareTest({ experimental: { newConfig: true } })],
+  plugins: [cloudflareTest({ config: true })],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, 'src'),

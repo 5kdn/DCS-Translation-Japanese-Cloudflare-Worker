@@ -39,7 +39,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.6.6",
     "@cloudflare/vite-plugin": "2.0.0-beta.v.8",
-    "@cloudflare/vitest-plugin": "1.6.0",
+    "@cloudflare/vitest-plugin": "1.6.1",
     "@types/node": "^26.6.6",
     "cf": "1.0.0-beta.26",
     "license-checker-rseidelsohn": "^5.0.1",
