@@ -213,8 +213,8 @@ importers:
         specifier: ^4.13.16
         version: 4.13.16
       jose:
-        specifier: ^6.2.14
-        version: 6.2.14
+        specifier: ^6.2.15
+        version: 6.2.15
       octokit:
         specifier: ^5.0.5
         version: 5.0.5
@@ -1478,8 +1478,8 @@ packages:
     resolution: {integrity: sha512-FFUtZMpoZ8RqHS3XeXEmHWLA4thH+ZxCv2lOiPIn1Xc7CxrqhWzNSDzD+/chS/zbYezmiwWLdQC09JdQKmthOw==}
     engines: {node: '>=20'}
 
-  jose@6.2.14:
-    resolution: {integrity: sha512-3JasLuki1NRLQvY4wCoC37KZk4qxoBx2k2aFqLxT84IezqW0bkJKnNtxnZj/Fu1xsQivoc/lytxaRHJoGLjJ1A==}
+  jose@6.2.15:
+    resolution: {integrity: sha512-qdF6ewcZARtef63fJ9AKKZPgxw+t7USH6HLXYcD4CrdmSvDp79rpJSPFEKc90QBeGS63u1KQtN2MZQHC0yDIzA==}
 
   json-parse-even-better-errors@5.0.0:
     resolution: {integrity: sha512-ZF1nxZ28VhQouRWhUcVlUIN3qwSgPuswK05s/HIaoetAoE/9tngVmCHjSxmSQPav1nd+lPtTL0YZ/2AFdR/iYQ==}
@@ -3124,7 +3124,7 @@ snapshots:
 
   isexe@4.0.0: {}
 
-  jose@6.2.14: {}
+  jose@6.2.15: {}
 
   json-parse-even-better-errors@5.0.0: {}
 
